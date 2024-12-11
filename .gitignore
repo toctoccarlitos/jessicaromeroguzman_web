@@ -3,3 +3,4 @@ code_extractor*
 local
 .vscode
 .htaccess
+.env
