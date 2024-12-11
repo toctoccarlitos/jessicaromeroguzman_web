@@ -1,0 +1,96 @@
+<form id="loginForm" class="space-y-6" method="POST">
+    <!-- Campo honeypot para spam -->
+    <div class="hidden">
+        <input type="text"
+            name="website"
+            id="website"
+            autocomplete="off">
+    </div>
+
+    <div class="relative">
+        <label for="email" class="block text-lg text-purple-600 mb-2">Email</label>
+        <div class="relative">
+            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="email"
+                id="email"
+                name="email"
+                required
+                class="form-input w-full pl-10 pr-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 transition-all"
+                placeholder="tu@email.com">
+        </div>
+        <div class="error-message hidden text-red-500 text-sm mt-1"></div>
+    </div>
+
+    <div class="relative">
+        <label for="password" class="block text-lg text-purple-600 mb-2">Contraseña</label>
+        <div class="relative">
+            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="password"
+                id="password"
+                name="password"
+                required
+                minlength="8"
+                class="form-input w-full pl-10 pr-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 transition-all"
+                placeholder="Tu contraseña">
+            <button type="button" 
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onclick="togglePassword()">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+        <div class="error-message hidden text-red-500 text-sm mt-1"></div>
+    </div>
+
+    <div class="flex items-center justify-between">
+        <div class="flex items-center">
+            <input type="checkbox"
+                id="remember"
+                name="remember"
+                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+            <label for="remember" class="ml-2 block text-sm text-gray-600">
+                Recordarme
+            </label>
+        </div>
+
+        <div class="text-sm">
+            <a href="#" class="text-purple-600 hover:text-purple-500">
+                ¿Olvidaste tu contraseña?
+            </a>
+        </div>
+    </div>
+
+    <button type="submit"
+            id="submitButton"
+            class="w-full bg-purple-600 text-white font-bold py-3 px-8 rounded-full hover:bg-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed group">
+        <span class="group-hover:hidden">Iniciar Sesión</span>
+        <span class="hidden group-hover:inline-flex items-center">
+            Acceder <i class="fas fa-arrow-right ml-2"></i>
+        </span>
+    </button>
+
+    <div class="text-center">
+        <p class="text-sm text-gray-600">
+            ¿No tienes cuenta? 
+            <a href="/registro.html" class="text-purple-600 hover:text-purple-500 font-medium">
+                Regístrate aquí
+            </a>
+        </p>
+    </div>
+</form>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const icon = document.querySelector('.fa-eye');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>

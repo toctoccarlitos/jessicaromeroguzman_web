@@ -1,0 +1,61 @@
+<form id="newsletterForm" class="max-w-lg mx-auto" action="process-newsletter.php" method="POST">
+    <div class="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-shadow duration-300 overflow-hidden">
+        <div class="p-8">
+            <div class="relative mb-6">
+                <input
+                    type="email"
+                    id="newsletter-email"
+                    name="newsletter-email"
+                    required
+                    class="peer w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder-transparent"
+                    placeholder="tu@email.com"
+                >
+                <label
+                    for="newsletter-email"
+                    class="absolute left-3 -top-2.5 bg-white px-2 text-sm text-purple-600 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-purple-600 peer-focus:text-sm"
+                >
+                    Tu email
+                </label>
+            </div>
+
+            <div class="flex items-start space-x-2 mb-6">
+                <input
+                    type="checkbox"
+                    id="newsletter-terms"
+                    name="newsletter-terms"
+                    required
+                    class="mt-1.5"
+                >
+                <label for="newsletter-terms" class="text-sm text-gray-500">
+                    Acepto recibir comunicaciones y he leído la
+                    <a href="/privacidad.html" class="text-purple-600 hover:text-purple-700 underline">Política de Privacidad</a>
+                </label>
+            </div>
+
+            <button
+                type="submit"
+                id="newsletter-submit"
+                disabled
+                class="w-full bg-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+            >
+                <span class="group-hover:hidden">Suscribirme</span>
+                <span class="hidden group-hover:inline-flex items-center justify-center">
+                    Unirme a la comunidad <i class="fas fa-arrow-right ml-2"></i>
+                </span>
+            </button>
+        </div>
+
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-8 py-4 border-t border-gray-100">
+            <div class="flex justify-around text-sm text-gray-600">
+                <span class="flex items-center">
+                    <i class="fas fa-lock text-purple-600 mr-2"></i>
+                    Contenido Premium
+                </span>
+                <span class="flex items-center">
+                    <i class="fas fa-paper-plane text-purple-600 mr-2"></i>
+                    Tips Semanales
+                </span>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,55 @@
+/* Estilos base y reset */
+body {
+    background-color: #FDF4FF;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* Headers y contenedores principales */
+.page-header {
+    background: linear-gradient(to right, #FCE7F3, #F3E8FF);
+}
+
+.container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Cards y elementos contenedores */
+.card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Secciones de contenido */
+.content-section {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Media queries base */
+@media (max-width: 640px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .card {
+        padding: 1.5rem !important;
+    }
+
+    .text-4xl {
+        font-size: 1.875rem;
+    }
+}

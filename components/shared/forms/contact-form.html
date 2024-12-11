@@ -1,0 +1,122 @@
+<form id="contactForm"
+    class="space-y-6"
+    data-form-id="<?php echo htmlspecialchars(uniqid('form_')); ?>"
+    action="process.php"
+    method="POST">
+
+    <!-- Token CSRF oculto -->
+    <input type="hidden"
+        name="csrf_token"
+        id="csrf_token"
+        value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
+
+    <!-- ID único del formulario -->
+    <input type="hidden"
+        name="form_id"
+        value="<?php echo htmlspecialchars(uniqid('contact_')); ?>">
+
+    <!-- Campo honeypot para spam -->
+    <div class="hidden">
+        <input type="text"
+            name="website"
+            id="website"
+            autocomplete="off">
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="relative">
+            <label for="nombre" class="block text-lg text-purple-600 mb-2">¿Cómo te llamas? *</label>
+            <div class="relative">
+                <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text"
+                    id="nombre"
+                    name="nombre"
+                    required
+                    minlength="2"
+                    maxlength="50"
+                    pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
+                    class="form-input w-full pl-10 pr-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 transition-all"
+                    placeholder="Tu nombre aquí..."
+                    data-validation="required letters">
+            </div>
+            <div class="error-message hidden text-red-500 text-sm mt-1"></div>
+        </div>
+
+        <div class="relative">
+            <label for="email" class="block text-lg text-purple-600 mb-2">¿Cuál es tu mejor email? *</label>
+            <div class="relative">
+                <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="email"
+                    id="email"
+                    name="email"
+                    required
+                    maxlength="100"
+                    class="form-input w-full pl-10 pr-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 transition-all"
+                    placeholder="tu@email.com"
+                    data-validation="required email">
+            </div>
+            <div class="error-message hidden text-red-500 text-sm mt-1"></div>
+        </div>
+    </div>
+
+    <div class="relative">
+        <label for="telefono" class="block text-lg text-purple-600 mb-2">¿Me dejas tu teléfono? (Opcional)</label>
+        <div class="relative">
+            <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="tel"
+                id="telefono"
+                name="telefono"
+                maxlength="15"
+                pattern="[0-9+\s-]+"
+                class="form-input w-full pl-10 pr-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 transition-all"
+                placeholder="+34 600 000 000"
+                data-validation="phone">
+        </div>
+        <div class="error-message hidden text-red-500 text-sm mt-1"></div>
+    </div>
+
+    <div class="relative">
+        <label for="mensaje" class="block text-lg text-purple-600 mb-2">¿En qué puedo ayudarte? *</label>
+        <div class="relative">
+            <i class="fas fa-comment absolute left-3 top-4 text-gray-400"></i>
+            <textarea id="mensaje"
+                name="mensaje"
+                required
+                minlength="10"
+                maxlength="500"
+                rows="4"
+                class="form-input w-full pl-10 pr-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 transition-all"
+                placeholder="Cuéntame un poco sobre lo que buscas..."
+                data-validation="required length"
+                data-validation-length="10-500"></textarea>
+        </div>
+        <div class="error-message hidden text-red-500 text-sm mt-1"></div>
+    </div>
+
+    <div class="flex items-start mb-6">
+        <input type="checkbox"
+            id="terms"
+            name="terms"
+            required
+            class="mt-1">
+        <label for="terms" class="ml-2 text-sm text-gray-600">
+            Acepto los <a href="/terminos.html" class="text-purple-600 hover:underline">términos y condiciones</a> y la
+            <a href="/privacidad.html" class="text-purple-600 hover:underline">política de privacidad</a> *
+        </label>
+    </div>
+
+    <button type="submit"
+            id="submitButton"
+            class="submit-button w-full bg-purple-600 text-white font-bold py-3 px-8 rounded-full hover:bg-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+            disabled>
+        <span class="group-hover:hidden">Enviar Mensaje</span>
+        <span class="hidden group-hover:inline-flex items-center">
+            ¡Conversemos! <i class="fas fa-arrow-right ml-2"></i>
+        </span>
+    </button>
+
+    <p class="text-center text-sm text-gray-500 mt-4">
+        <i class="fas fa-shield-alt text-purple-600 mr-1"></i>
+        Tus datos están seguros y nunca serán compartidos con terceros
+    </p>
+</form>
