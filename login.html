@@ -7,12 +7,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="Iniciar sesión - Jessica Romero Guzmán">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.googletagmanager.com https://*.google-analytics.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
         style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-        img-src 'self' data: https://*.google-analytics.com https://www.google.es https://stats.g.doubleclick.net;
         font-src 'self' https://cdnjs.cloudflare.com;
-        connect-src 'self' https://*.google-analytics.com https://stats.g.doubleclick.net;
-        frame-src 'self' https://www.youtube.com https://youtube.com;">
+        connect-src 'self';">
 
     <title>Iniciar Sesión | Jessica Romero Guzmán</title>
 
@@ -23,43 +21,140 @@
     <link href="css/components.css" rel="stylesheet">
     <link href="css/utilities.css" rel="stylesheet">
 
-    <script type="module">
-        import { initializePage } from './js/init.js';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initializePage().then(({ componentLoader, analytics }) => {
-            });
-        });
-    </script>
+    <script src="https://www.google.com/recaptcha/enterprise.js?onload=onRecaptchaLoad&render=TU_SITE_KEY" async defer></script>
 </head>
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-pink-100 to-purple-100">
-        <div class="container mx-auto px-6 py-8">
-            <nav class="mb-8">
-                <a href="/" class="text-purple-600 hover:text-purple-700 transition-colors inline-flex items-center">
-                    <i class="fas fa-arrow-left mr-2"></i> Volver al Inicio
-                </a>
-            </nav>
-        </div>
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-pink-100 via-purple-50 to-pink-100">
+    <!-- Header con botón reposicionado -->
+    <header class="w-full py-4 px-6">
+        <a href="/" class="text-purple-600 hover:text-purple-700 transition-colors inline-flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Volver al Inicio
+        </a>
     </header>
 
-    <!-- Contenido Principal -->
-    <main class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Bienvenida de nuevo</h1>
-                <p class="text-gray-600">Accede a tu cuenta para continuar</p>
+    <!-- Contenedor principal centrado -->
+    <!-- Contenedor principal -->
+<div class="flex-grow flex items-center justify-center px-4 sm:px-6 py-8">
+    <div class="w-full max-w-md mx-auto">
+        <!-- Avatar y título centrado -->
+        <div class="text-center mb-8">
+            <div class="inline-block p-2 rounded-full bg-purple-100 mb-4">
+                <i class="fas fa-user-circle text-5xl text-purple-500"></i>
             </div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">¡Hola de nuevo! 👋</h1>
+            <p class="text-gray-600">Me alegro de verte otra vez</p>
+        </div>
 
-            <div class="bg-white rounded-2xl shadow-xl p-8">
-                <div id="login-form-container" data-component="login-form"></div>
+        <div class="relative">
+            <!-- Login Card -->
+            <div id="cardContainer" class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <!-- Paso 1: Email -->
+                <div id="email-step" class="p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">¿Cuál es tu email?</h2>
+                    <form id="email-form" class="space-y-6" novalidate>
+                        <div class="relative">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <input type="email"
+                                id="login-email"
+                                name="email"
+                                required
+                                class="peer w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder-transparent"
+                                placeholder="Tu email">
+                            <label for="login-email"
+                                class="absolute left-10 -top-2.5 bg-white px-2 text-sm text-purple-600 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-focus:-top-2.5 peer-focus:text-purple-600 peer-focus:text-sm">
+                                Tu email
+                            </label>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-purple-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-purple-700 transform hover:-translate-y-0.5 transition-all duration-200 group">
+                            <span class="group-hover:hidden">Continuar</span>
+                            <span class="hidden group-hover:inline-flex items-center justify-center">
+                                ¡Vamos allá! <i class="fas fa-arrow-right ml-2"></i>
+                            </span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Paso 2: Password -->
+                <div id="password-step" class="absolute top-0 left-0 w-full transform translate-x-full transition-transform duration-300 ease-in-out">
+                    <div class="p-6">
+                        <form id="password-form" class="space-y-6" novalidate>
+                            <!-- Botón de regreso y email -->
+                            <div class="flex items-center mb-4">
+                                <button type="button" id="back-to-email" class="text-purple-600 hover:text-purple-700">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                </button>
+                                <span id="display-email" class="text-gray-600 ml-2 font-medium truncate"></span>
+                            </div>
+
+                            <h2 class="text-2xl font-semibold text-gray-800 mb-6">¿Cuál es tu contraseña?</h2>
+
+                            <!-- Input de contraseña -->
+                            <div class="relative">
+                                <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <input type="password"
+                                    id="login-password"
+                                    name="password"
+                                    required
+                                    minlength="8"
+                                    class="peer w-full pl-10 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                    placeholder="Contraseña">
+                                <button type="button" 
+                                    id="togglePassword"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10">
+                                    <i class="fas fa-eye text-lg"></i>
+                                </button>
+                            </div>
+
+                            <!-- Recordarme y Olvidaste contraseña -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input type="checkbox"
+                                        id="remember"
+                                        name="remember"
+                                        class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                    <label for="remember" class="ml-2 text-sm text-gray-600">
+                                        Recordarme
+                                    </label>
+                                </div>
+                                <button type="button"
+                                    id="forgot-password-btn"
+                                    class="text-sm text-purple-600 hover:text-purple-700 hover:underline transition-colors focus:outline-none">
+                                    ¿Olvidaste tu contraseña?
+                                </button>
+                            </div>
+
+                            <!-- Botón de submit -->
+                            <button type="submit"
+                                class="w-full bg-purple-600 text-white font-bold py-3 px-8 rounded-full hover:bg-purple-700 transform hover:-translate-y-0.5 transition-all duration-200 group">
+                                <span class="group-hover:hidden">Iniciar Sesión</span>
+                                <span class="hidden group-hover:inline-flex items-center justify-center">
+                                    ¡Adelante! <i class="fas fa-sign-in-alt ml-2"></i>
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-    </main>
+    </div>
+</div>
 
-    <footer id="footer-container" data-component="footer"></footer>
-
+    <footer id="footer-container" data-component="footer" class="mt-auto"></footer>
     <div id="cookie-banner-container" data-component="cookie-banner"></div>
+
+    <script type="module">
+        import { initializeLoginForm } from './js/login-form.js';
+        import { initializePage } from './js/init.js';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializePage();
+            initializeLoginForm();
+        });
+    </script>
 </body>
 </html>
