@@ -100,34 +100,7 @@
     overflow: hidden;
 }
 
-/* Animaciones de transición */
-#email-step,
-#password-step {
-    opacity: 1;
-    transform: translateX(0);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 100%;
-}
-
 #email-step {
-    z-index: 2;
-}
-
-#password-step {
-    z-index: 1;
-    transform: translateX(100%);
-    opacity: 0;
-}
-
-#email-step.slide-left {
-    transform: translateX(-100%);
-    opacity: 0;
-    z-index: 1;
-}
-
-#password-step.slide-in {
-    transform: translateX(0);
-    opacity: 1;
     z-index: 2;
 }
 
@@ -172,34 +145,6 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-/* Login Steps */
-#email-step,
-#password-step {
-    opacity: 1;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#password-step {
-    transform: translateX(100%);
-    opacity: 0;
-}
-
-#email-step.slide-left {
-    transform: translateX(-100%);
-    opacity: 0;
-}
-
-#password-step.slide-in {
-    transform: translateX(0);
-    opacity: 1;
-}
-
-.card-container {
-    position: relative;
-    min-height: 400px;
-    transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Responsive adjustments */
@@ -278,23 +223,161 @@ input[type="checkbox"]:checked + label .checkbox-icon {
     overflow: hidden;
 }
 
-/* Estilos base para los pasos */
-#email-step,
-#password-step {
-    transition: transform 0.4s ease-in-out;
-}
-
 /* Posición inicial */
 #password-step {
     transform: translateX(100%);
 }
 
-/* Clases para la animación */
+/* Animación de la mano saludando */
+.waving-hand {
+    display: inline-block;
+    animation: wave 2.5s infinite;
+    transform-origin: 70% 70%;
+}
+
+@keyframes wave {
+    0% { transform: rotate(0deg); }
+    10% { transform: rotate(-10deg); }
+    20% { transform: rotate(12deg); }
+    30% { transform: rotate(-10deg); }
+    40% { transform: rotate(9deg); }
+    50% { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Botón de login con animación de carga */
+.loading-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    from { left: -100%; }
+    to { left: 100%; }
+}
+
+.success-button {
+    background-color: #10B981 !important;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+
+/* Contenedor principal del card */
+#cardContainer {
+    position: relative;
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    min-height: 200px;
+    transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#email-step,
+#password-step {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0;
+    /* padding: 2rem; */
+    background: white;
+    opacity: 1;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility: visible;
+}
+
+.space-y-6 {
+    margin-bottom: 0;
+}
+
+/* Ajustar el contenedor principal */
+.flex-grow.flex {
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.max-w-md {
+    width: 100%;
+    max-width: 28rem;
+}
+
+#password-step {
+    transform: translateX(100%);
+    opacity: 0;
+    visibility: hidden;
+}
+
 #email-step.slide-left {
     transform: translateX(-100%);
+    opacity: 0;
+    visibility: hidden;
 }
 
 #password-step.slide-in {
     transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
 }
 
+.form-content {
+    position: relative;
+    width: 100%;
+}
+
+.text-red-500 {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+}
+
+.relative {
+    margin-bottom: 24px;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+ }
+
+ @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+ }
+
+ .animate-bounce {
+    animation: bounce 0.6s ease-in-out;
+ }
+
+ @keyframes bounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+ }
+
+ .animate-fadeIn {
+    animation: fadeIn 0.3s ease-in;
+ }
+
+ @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+ }

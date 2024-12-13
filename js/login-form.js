@@ -1,5 +1,3 @@
-// js/login-form.js
-
 let recaptchaReady = false;
 
 // Función para cargar reCAPTCHA
@@ -20,7 +18,7 @@ async function getRecaptchaToken(action) {
         console.error('reCAPTCHA no está listo');
         return null;
     }
-    
+
     try {
         const token = await grecaptcha.enterprise.execute('TU_SITE_KEY', {
             action: action
@@ -32,6 +30,53 @@ async function getRecaptchaToken(action) {
     }
 }
 
+// Función para resetear input
+function resetInput(input) {
+    input.classList.remove('border-red-500');
+    const errorMsg = input.parentNode.querySelector('.text-red-500');
+    if (errorMsg) errorMsg.remove();
+}
+
+// Función para mostrar mensaje de error
+function showError(message, inputElement) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'text-red-500 text-sm mt-2 absolute bottom-[-20px] left-0';
+    errorDiv.textContent = message;
+
+    inputElement.classList.add('border-red-500');
+
+    return errorDiv;
+}
+
+// Función para mostrar mensajes toast
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    const icon = type === 'success' ? 'check-circle' :
+                 type === 'error' ? 'exclamation-circle' : 'info-circle';
+
+    toast.className = `fixed bottom-4 right-4 ${
+        type === 'success' ? 'bg-green-500' :
+        type === 'error' ? 'bg-red-500' : 'bg-purple-500'
+    } text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-2
+    transform transition-all duration-300 opacity-0 translate-y-2`;
+
+    toast.innerHTML = `
+        <i class="fas fa-${icon} animate-bounce"></i>
+        <span class="ml-2">${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0', 'translate-y-2');
+    });
+
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
 // Función principal de inicialización
 export function initializeLoginForm() {
     const emailStep = document.getElementById('email-step');
@@ -41,15 +86,14 @@ export function initializeLoginForm() {
     const backButton = document.getElementById('back-to-email');
     const displayEmail = document.getElementById('display-email');
     const togglePasswordBtn = document.getElementById('togglePassword');
+    const cardContainer = document.getElementById('cardContainer');
 
-    // Verificar si hay un email en la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const emailFromUrl = urlParams.get('email');
-    if (emailFromUrl) {
-        document.getElementById('login-email').value = decodeURIComponent(emailFromUrl);
-    }
+    // Establecer altura inicial del contenedor
+    requestAnimationFrame(() => {
+        cardContainer.style.height = `${emailStep.offsetHeight}px`;
+    });
 
-    // Manejar toggle de contraseña
+    // Toggle password visibility
     if (togglePasswordBtn) {
         togglePasswordBtn.addEventListener('click', function() {
             const passwordInput = document.getElementById('login-password');
@@ -67,147 +111,167 @@ export function initializeLoginForm() {
         });
     }
 
+    // Email form submission
+    emailForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const emailInput = emailForm.querySelector('input[type="email"]');
+        const email = emailInput.value.trim();
+
+        // Limpiar errores previos
+        const existingError = emailForm.querySelector('.text-red-500');
+        if (existingError) existingError.remove();
+
+        // Validar email vacío
+        if (!email) {
+            emailInput.parentNode.appendChild(
+                showError('Por favor, introduce tu email', emailInput)
+            );
+            return;
+        }
+
+        // Validar formato de email
+        if (!emailInput.checkValidity()) {
+            emailInput.parentNode.appendChild(
+                showError('Por favor, introduce un email válido', emailInput)
+            );
+            return;
+        }
+
+        const submitButton = emailForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Verificando...';
+
+        try {
+            const newUrl = `${window.location.pathname}?email=${encodeURIComponent(email)}`;
+            window.history.pushState({ email }, '', newUrl);
+
+            displayEmail.textContent = email;
+            cardContainer.style.height = `${passwordStep.offsetHeight}px`;
+
+            emailStep.classList.add('slide-left');
+            passwordStep.classList.add('slide-in');
+
+            setTimeout(() => {
+                document.getElementById('login-password').focus();
+            }, 800);
+        } catch (error) {
+            showError('Ocurrió un error. Por favor, inténtalo de nuevo.');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = `
+                <span class="group-hover:hidden">Continuar</span>
+                <span class="hidden group-hover:inline-flex items-center">
+                    ¡Vamos allá! <i class="fas fa-arrow-right ml-2"></i>
+                </span>`;
+        }
+    });
+
+    // Password form submission
+    passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const passwordInput = document.getElementById('login-password');
+        const submitButton = passwordForm.querySelector('button[type="submit"]');
+
+        // Limpiar errores previos
+        const existingError = passwordForm.querySelector('.text-red-500');
+        if (existingError) existingError.remove();
+
+        if (!passwordInput.value) {
+            passwordInput.parentNode.appendChild(
+                showError('Por favor, introduce tu contraseña', passwordInput)
+            );
+            return;
+        }
+
+        if (!validatePassword(passwordInput.value)) {
+            passwordInput.parentNode.appendChild(
+                showError('La contraseña debe tener al menos 6 caracteres', passwordInput)
+            );
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Verificando...';
+
+        setTimeout(() => {
+            submitButton.classList.remove('loading-button');
+            submitButton.classList.add('success-button');
+            submitButton.innerHTML = '<i class="fas fa-check animate-bounce"></i> ¡Bienvenido!';
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+        }, 2000);
+    });
+
+    // Forgot password handler
     const forgotPasswordBtn = document.getElementById('forgot-password-btn');
     if (forgotPasswordBtn) {
         forgotPasswordBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const email = displayEmail.textContent;
-            
-            // Mostrar modal o mensaje
-            showToast('Se ha enviado un email de recuperación a ' + email, 'info');
-            
-            // En producción, aquí iría la llamada al servidor
-            console.log('Recuperar contraseña para:', email);
+            const submitButton = passwordForm.querySelector('button[type="submit"]');
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Recuperando...';
+
+            setTimeout(() => {
+                submitButton.classList.add('success-button');
+                submitButton.innerHTML = '<i class="fas fa-check animate-bounce"></i> Email enviado';
+
+                showToast(`Se ha enviado un email a ${email} con las instrucciones para recuperar tu contraseña.`, 'success');
+
+                setTimeout(() => {
+                    submitButton.classList.remove('success-button');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = `
+                        <span class="group-hover:hidden">Iniciar Sesión</span>
+                        <span class="hidden group-hover:inline-flex items-center justify-center">
+                            ¡Adelante! <i class="fas fa-sign-in-alt ml-2"></i>
+                        </span>`;
+                }, 2000);
+            }, 1500);
         });
     }
 
-    // Manejar envío del email
-    emailForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const emailInput = emailForm.querySelector('input[type="email"]');
-        const email = emailInput.value.trim();
-    
-        if (email && emailInput.checkValidity()) {
-            const submitButton = emailForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
-    
-            try {
-                // Actualizar URL sin recargar
-                const newUrl = `${window.location.pathname}?email=${encodeURIComponent(email)}`;
-                window.history.pushState({ email }, '', newUrl);
-    
-                // Mostrar email en el siguiente paso
-                displayEmail.textContent = email;
-    
-                // Suavizar transición
-                document.getElementById('cardContainer').style.height = 
-                    document.getElementById('password-step').offsetHeight + 'px';
-    
-                // Activar transición con delay para animación más suave
-                setTimeout(() => {
-                    emailStep.classList.add('slide-left');
-                    passwordStep.classList.add('slide-in');
-                }, 50);
-    
-                // Enfocar campo de contraseña
-                setTimeout(() => {
-                    document.getElementById('login-password').focus();
-                }, 500);
-            } catch (error) {
-                showToast('Ocurrió un error. Por favor, inténtalo de nuevo.', 'error');
-            } finally {
-                submitButton.disabled = false;
-                submitButton.innerHTML = `
-                    <span class="group-hover:hidden">Continuar</span>
-                    <span class="hidden group-hover:inline-flex items-center">
-                        ¡Vamos allá! <i class="fas fa-arrow-right ml-2"></i>
-                    </span>`;
-            }
-        }
-    });
+    // Back button handler
+    if (backButton) {
+        backButton.addEventListener('click', () => {
+            window.history.pushState({}, '', window.location.pathname);
+            cardContainer.style.height = `${emailStep.offsetHeight}px`;
 
-    // Manejar botón de retroceso
-    backButton.addEventListener('click', () => {
-        // Actualizar URL sin recargar
-        window.history.pushState({}, '', window.location.pathname);
+            emailStep.classList.remove('slide-left');
+            passwordStep.classList.remove('slide-in');
 
-        // Revertir transición
-        emailStep.classList.remove('slide-left');
-        passwordStep.classList.remove('slide-in');
+            setTimeout(() => {
+                document.getElementById('login-email').focus();
+            }, 800);
+        });
+    }
 
-        document.getElementById('cardContainer').style.height = 'auto';
+    // Input reset handlers
+    const emailInput = document.getElementById('login-email');
+    const passwordInput = document.getElementById('login-password');
 
-        // Enfocar campo de email
-        setTimeout(() => {
-            document.getElementById('login-email').focus();
-        }, 300);
-    });
-
-    // Manejar envío del formulario de contraseña
-    passwordForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const passwordInput = passwordForm.querySelector('input[type="password"]');
-        const password = passwordInput.value;
-
-        if (password) {
-            const submitButton = passwordForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accediendo...';
-
-            try {
-                // Simular login exitoso
-                setTimeout(() => {
-                    showToast('¡Login exitoso! Redirigiendo...', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 1500);
-                }, 1000);
-
-            } catch (error) {
-                showToast('Error en el inicio de sesión. Por favor, inténtalo de nuevo.', 'error');
-            } finally {
-                submitButton.disabled = false;
-                submitButton.innerHTML = `
-                    <span class="group-hover:hidden">Iniciar Sesión</span>
-                    <span class="hidden group-hover:inline-flex items-center justify-center">
-                        ¡Adelante! <i class="fas fa-sign-in-alt ml-2"></i>
-                    </span>`;
-            }
-        }
-    });
+    emailInput.addEventListener('input', () => resetInput(emailInput));
+    passwordInput.addEventListener('input', () => resetInput(passwordInput));
 }
 
-// Función para mostrar mensajes toast
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    const bgColor = type === 'error' ? 'bg-red-500' : 
-                    type === 'success' ? 'bg-green-500' : 
-                    'bg-purple-500';
-    
-    toast.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(100%)';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+// Función para validar la contraseña
+function validatePassword(password) {
+    return password && password.length >= 6;
 }
 
 // Manejar eventos de navegación
 window.addEventListener('popstate', (event) => {
     const emailStep = document.getElementById('email-step');
     const passwordStep = document.getElementById('password-step');
-    
+
     if (event.state && event.state.email) {
-        // Ir al paso de contraseña
         emailStep.classList.add('slide-left');
         passwordStep.classList.add('slide-in');
         document.getElementById('display-email').textContent = event.state.email;
     } else {
-        // Volver al paso de email
         emailStep.classList.remove('slide-left');
         passwordStep.classList.remove('slide-in');
     }

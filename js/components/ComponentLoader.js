@@ -7,7 +7,7 @@ export class ComponentLoader {
             'contact-form': './components/shared/forms/contact-form.html',
             'social-links': './components/shared/social-links.html',
             'cookie-banner': './components/shared/cookie-banner.html',
-            'login-form': './components/shared/forms/login-form.html' 
+            'login-form': './components/shared/forms/login-form.html'
         };
     }
 

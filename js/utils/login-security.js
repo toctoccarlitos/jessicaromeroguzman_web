@@ -17,13 +17,13 @@ export function initializeLoginSecurity() {
 export function handleFailedLogin() {
     const attempts = getLoginAttempts();
     attempts.count = (attempts.count || 0) + 1;
-    
+
     if (attempts.count >= MAX_ATTEMPTS) {
         attempts.lockoutEnd = Date.now() + LOCKOUT_TIME;
         disableLoginForm();
         showLockoutMessage(attempts.lockoutEnd);
     }
-    
+
     localStorage.setItem(LOGIN_ATTEMPT_KEY, JSON.stringify(attempts));
 }
 
@@ -57,7 +57,7 @@ function disableLoginForm() {
 function showLockoutMessage(lockoutEnd) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'text-red-500 text-sm mt-4';
-    
+
     const updateMessage = () => {
         const timeLeft = Math.ceil((lockoutEnd - Date.now()) / 1000);
         if (timeLeft <= 0) {
@@ -71,7 +71,7 @@ function showLockoutMessage(lockoutEnd) {
 
     updateMessage();
     const interval = setInterval(updateMessage, 1000);
-    
+
     const form = document.getElementById('login-form');
     if (form) {
         form.parentNode.insertBefore(messageDiv, form.nextSibling);
@@ -89,7 +89,7 @@ export async function validateRecaptcha() {
             },
             body: JSON.stringify({ token })
         });
-        
+
         const data = await response.json();
         return data.score >= 0.5; // Umbral de puntuación recomendado por Google
     } catch (error) {
@@ -102,7 +102,7 @@ export async function validateRecaptcha() {
 export function preventBruteForce(email) {
     const key = `attempt_${email}_${new Date().toISOString().split('T')[0]}`;
     const attempts = JSON.parse(localStorage.getItem(key) || '{"count": 0, "timestamp": 0}');
-    
+
     if (attempts.count >= MAX_ATTEMPTS) {
         const timeSinceLastAttempt = Date.now() - attempts.timestamp;
         if (timeSinceLastAttempt < LOCKOUT_TIME) {
@@ -112,7 +112,7 @@ export function preventBruteForce(email) {
         localStorage.removeItem(key);
         return true;
     }
-    
+
     attempts.count++;
     attempts.timestamp = Date.now();
     localStorage.setItem(key, JSON.stringify(attempts));
