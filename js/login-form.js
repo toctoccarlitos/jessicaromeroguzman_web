@@ -1,51 +1,187 @@
-let recaptchaReady = false;
+import { authService } from './services/authService.js';
+import { initializeLoginSecurity, preventBruteForce, sanitizeLoginInput } from './utils/login-security.js';
 
-// Función para cargar reCAPTCHA
-function loadRecaptcha() {
-    return new Promise((resolve) => {
-        window.onRecaptchaLoad = () => {
-            grecaptcha.enterprise.ready(() => {
-                recaptchaReady = true;
-                resolve();
-            });
-        };
-    });
-}
+let currentEmail = '';
 
-// Función para obtener el token de reCAPTCHA
-async function getRecaptchaToken(action) {
-    if (!recaptchaReady) {
-        console.error('reCAPTCHA no está listo');
-        return null;
+export async function initializeLoginForm() {
+    const emailStep = document.getElementById('email-step');
+    const passwordStep = document.getElementById('password-step');
+    const emailForm = document.getElementById('email-form');
+    const passwordForm = document.getElementById('password-form');
+    const backButton = document.getElementById('back-to-email');
+    const displayEmail = document.getElementById('display-email');
+    const cardContainer = document.getElementById('cardContainer');
+
+    // Verificar si ya hay una sesión activa
+    const checkExistingSession = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                await authService.getProfile();
+                window.location.href = '/dashboard.html';
+                return true;
+            } catch (error) {
+                if (error.status === 401) {
+                    try {
+                        await authService.refreshToken();
+                        window.location.href = '/dashboard.html';
+                        return true;
+                    } catch (refreshError) {
+                        console.error('Error refreshing token:', refreshError);
+                        authService.clearAuthData();
+                    }
+                }
+            }
+        }
+        return false;
+    };
+
+    // Verificar sesión existente
+    await checkExistingSession();
+
+    // Establecer altura inicial del contenedor
+    if (cardContainer && emailStep) {
+        requestAnimationFrame(() => {
+            cardContainer.style.height = `${emailStep.offsetHeight}px`;
+        });
     }
 
-    try {
-        const token = await grecaptcha.enterprise.execute('TU_SITE_KEY', {
-            action: action
+    // Email form submission
+    if (emailForm) {
+        emailForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const emailInput = emailForm.querySelector('input[type="email"]');
+            const email = sanitizeLoginInput(emailInput.value);
+
+            resetInput(emailInput);
+
+            // Verificar intentos de fuerza bruta
+            // if (!preventBruteForce(email)) {
+            //     showToast('Demasiados intentos. Por favor, espera unos minutos.');
+            //     return;
+            // }
+
+            if (!emailInput.checkValidity()) {
+                showError('Por favor, introduce un email válido', emailInput);
+                return;
+            }
+
+            const submitButton = emailForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Verificando...';
+
+            try {
+                currentEmail = email;
+                if (displayEmail) displayEmail.textContent = email;
+
+                if (cardContainer && passwordStep) {
+                    cardContainer.style.height = `${passwordStep.offsetHeight}px`;
+                }
+                emailStep.classList.add('slide-left');
+                passwordStep.classList.add('slide-in');
+
+                setTimeout(() => {
+                    document.getElementById('login-password')?.focus();
+                }, 800);
+            } catch (error) {
+                showError(error.message, emailInput);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = `
+                    <span class="group-hover:hidden">Continuar</span>
+                    <span class="hidden group-hover:inline-flex items-center">
+                        ¡Vamos allá! <i class="fas fa-arrow-right ml-2"></i>
+                    </span>`;
+            }
         });
-        return token;
-    } catch (error) {
-        console.error('Error al obtener token de reCAPTCHA:', error);
-        return null;
+    }
+
+    // Password form submission
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const passwordInput = document.getElementById('login-password');
+            const password = passwordInput?.value || '';
+            const submitButton = passwordForm.querySelector('button[type="submit"]');
+
+            if (!passwordInput) return;
+            resetInput(passwordInput);
+
+            if (!password) {
+                showError('Por favor, introduce tu contraseña', passwordInput);
+                return;
+            }
+
+            if (!submitButton) return;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Verificando...';
+
+            try {
+                await new Promise(resolve => grecaptcha.ready(resolve));
+
+                const recaptchaToken = await new Promise((resolve, reject) => {
+                    grecaptcha.execute('6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl', { action: 'login' }).then(resolve).catch(reject);
+                  });
+
+                // console.log('Token reCAPTCHA:', recaptchaToken);
+
+                const loginResponse = await authService.login(currentEmail, password, recaptchaToken);
+
+                if (loginResponse.status === 'success') {
+                    submitButton.classList.add('success-button');
+                    submitButton.innerHTML = '<i class="fas fa-check animate-bounce"></i> ¡Bienvenido!';
+
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1500);
+                } else {
+                    throw new Error('Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Credenciales incorrectas', passwordInput);
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Iniciar Sesión';
+            }
+        });
+    }
+
+    // Back button handler
+    if (backButton && cardContainer && emailStep) {
+        backButton.addEventListener('click', () => {
+            cardContainer.style.height = `${emailStep.offsetHeight}px`;
+            emailStep.classList.remove('slide-left');
+            passwordStep.classList.remove('slide-in');
+
+            setTimeout(() => {
+                document.getElementById('login-email')?.focus();
+            }, 800);
+        });
     }
 }
 
 // Función para resetear input
 function resetInput(input) {
+    if (!input) return;
     input.classList.remove('border-red-500');
-    const errorMsg = input.parentNode.querySelector('.text-red-500');
-    if (errorMsg) errorMsg.remove();
+    const errorMsg = input.parentElement?.querySelector('.text-red-500');
+    errorMsg?.remove();
 }
 
-// Función para mostrar mensaje de error
+// Función para mostrar error
 function showError(message, inputElement) {
+    if (!inputElement) return;
     const errorDiv = document.createElement('div');
-    errorDiv.className = 'text-red-500 text-sm mt-2 absolute bottom-[-20px] left-0';
+    errorDiv.className = 'text-red-500 text-sm mt-1';
     errorDiv.textContent = message;
 
-    inputElement.classList.add('border-red-500');
+    const existingError = inputElement.parentElement?.querySelector('.text-red-500');
+    existingError?.remove();
 
-    return errorDiv;
+    inputElement.classList.add('border-red-500');
+    inputElement.parentElement?.appendChild(errorDiv);
 }
 
 // Función para mostrar mensajes toast
@@ -77,202 +213,58 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
-// Función principal de inicialización
-export function initializeLoginForm() {
-    const emailStep = document.getElementById('email-step');
-    const passwordStep = document.getElementById('password-step');
-    const emailForm = document.getElementById('email-form');
-    const passwordForm = document.getElementById('password-form');
-    const backButton = document.getElementById('back-to-email');
-    const displayEmail = document.getElementById('display-email');
-    const togglePasswordBtn = document.getElementById('togglePassword');
-    const cardContainer = document.getElementById('cardContainer');
+async function handleLoginSuccess(loginResponse) {
+    try {
+        if (loginResponse.status === 'success' && loginResponse.data) {
+            // Guardar tokens
+            localStorage.setItem('token', loginResponse.data.access_token);
+            localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
 
-    // Establecer altura inicial del contenedor
-    requestAnimationFrame(() => {
-        cardContainer.style.height = `${emailStep.offsetHeight}px`;
-    });
-
-    // Toggle password visibility
-    if (togglePasswordBtn) {
-        togglePasswordBtn.addEventListener('click', function() {
-            const passwordInput = document.getElementById('login-password');
-            const icon = this.querySelector('i');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+            // Guardar datos básicos del usuario
+            if (loginResponse.data.user) {
+                localStorage.setItem('userProfile', JSON.stringify(loginResponse.data.user));
             }
-        });
-    }
 
-    // Email form submission
-    emailForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const emailInput = emailForm.querySelector('input[type="email"]');
-        const email = emailInput.value.trim();
-
-        // Limpiar errores previos
-        const existingError = emailForm.querySelector('.text-red-500');
-        if (existingError) existingError.remove();
-
-        // Validar email vacío
-        if (!email) {
-            emailInput.parentNode.appendChild(
-                showError('Por favor, introduce tu email', emailInput)
-            );
-            return;
-        }
-
-        // Validar formato de email
-        if (!emailInput.checkValidity()) {
-            emailInput.parentNode.appendChild(
-                showError('Por favor, introduce un email válido', emailInput)
-            );
-            return;
-        }
-
-        const submitButton = emailForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Verificando...';
-
-        try {
-            const newUrl = `${window.location.pathname}?email=${encodeURIComponent(email)}`;
-            window.history.pushState({ email }, '', newUrl);
-
-            displayEmail.textContent = email;
-            cardContainer.style.height = `${passwordStep.offsetHeight}px`;
-
-            emailStep.classList.add('slide-left');
-            passwordStep.classList.add('slide-in');
-
-            setTimeout(() => {
-                document.getElementById('login-password').focus();
-            }, 800);
-        } catch (error) {
-            showError('Ocurrió un error. Por favor, inténtalo de nuevo.');
-        } finally {
-            submitButton.disabled = false;
-            submitButton.innerHTML = `
-                <span class="group-hover:hidden">Continuar</span>
-                <span class="hidden group-hover:inline-flex items-center">
-                    ¡Vamos allá! <i class="fas fa-arrow-right ml-2"></i>
-                </span>`;
-        }
-    });
-
-    // Password form submission
-    passwordForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const passwordInput = document.getElementById('login-password');
-        const submitButton = passwordForm.querySelector('button[type="submit"]');
-
-        // Limpiar errores previos
-        const existingError = passwordForm.querySelector('.text-red-500');
-        if (existingError) existingError.remove();
-
-        if (!passwordInput.value) {
-            passwordInput.parentNode.appendChild(
-                showError('Por favor, introduce tu contraseña', passwordInput)
-            );
-            return;
-        }
-
-        if (!validatePassword(passwordInput.value)) {
-            passwordInput.parentNode.appendChild(
-                showError('La contraseña debe tener al menos 6 caracteres', passwordInput)
-            );
-            return;
-        }
-
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Verificando...';
-
-        setTimeout(() => {
-            submitButton.classList.remove('loading-button');
-            submitButton.classList.add('success-button');
-            submitButton.innerHTML = '<i class="fas fa-check animate-bounce"></i> ¡Bienvenido!';
-
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1500);
-        }, 2000);
-    });
-
-    // Forgot password handler
-    const forgotPasswordBtn = document.getElementById('forgot-password-btn');
-    if (forgotPasswordBtn) {
-        forgotPasswordBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const email = displayEmail.textContent;
-            const submitButton = passwordForm.querySelector('button[type="submit"]');
-
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Recuperando...';
-
-            setTimeout(() => {
+            // Actualizar UI
+            const submitButton = document.querySelector('button[type="submit"]');
+            if (submitButton) {
                 submitButton.classList.add('success-button');
-                submitButton.innerHTML = '<i class="fas fa-check animate-bounce"></i> Email enviado';
+                submitButton.innerHTML = '<i class="fas fa-check animate-bounce"></i> ¡Bienvenido!';
+            }
 
-                showToast(`Se ha enviado un email a ${email} con las instrucciones para recuperar tu contraseña.`, 'success');
-
-                setTimeout(() => {
-                    submitButton.classList.remove('success-button');
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = `
-                        <span class="group-hover:hidden">Iniciar Sesión</span>
-                        <span class="hidden group-hover:inline-flex items-center justify-center">
-                            ¡Adelante! <i class="fas fa-sign-in-alt ml-2"></i>
-                        </span>`;
-                }, 2000);
-            }, 1500);
-        });
-    }
-
-    // Back button handler
-    if (backButton) {
-        backButton.addEventListener('click', () => {
-            window.history.pushState({}, '', window.location.pathname);
-            cardContainer.style.height = `${emailStep.offsetHeight}px`;
-
-            emailStep.classList.remove('slide-left');
-            passwordStep.classList.remove('slide-in');
-
+            // Redirección
             setTimeout(() => {
-                document.getElementById('login-email').focus();
-            }, 800);
-        });
+                const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard.html';
+                sessionStorage.removeItem('redirectUrl');
+                window.location.href = redirectUrl;
+            }, 1500);
+
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error('Error processing login response:', error);
+        return false;
     }
-
-    // Input reset handlers
-    const emailInput = document.getElementById('login-email');
-    const passwordInput = document.getElementById('login-password');
-
-    emailInput.addEventListener('input', () => resetInput(emailInput));
-    passwordInput.addEventListener('input', () => resetInput(passwordInput));
-}
-
-// Función para validar la contraseña
-function validatePassword(password) {
-    return password && password.length >= 6;
 }
 
 // Manejar eventos de navegación
 window.addEventListener('popstate', (event) => {
     const emailStep = document.getElementById('email-step');
     const passwordStep = document.getElementById('password-step');
+    const cardContainer = document.getElementById('cardContainer');
 
     if (event.state && event.state.email) {
         emailStep.classList.add('slide-left');
         passwordStep.classList.add('slide-in');
         document.getElementById('display-email').textContent = event.state.email;
+        cardContainer.style.height = `${passwordStep.offsetHeight}px`;
     } else {
         emailStep.classList.remove('slide-left');
         passwordStep.classList.remove('slide-in');
+        cardContainer.style.height = `${emailStep.offsetHeight}px`;
     }
 });
+
+// Inicializar seguridad del login al cargar
+initializeLoginSecurity();

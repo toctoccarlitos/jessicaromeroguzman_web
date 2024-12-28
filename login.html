@@ -7,10 +7,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="Iniciar sesión - Jessica Romero Guzmán">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
-        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-        font-src 'self' https://cdnjs.cloudflare.com;
-        connect-src 'self';">
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://*.google-analytics.com;
+    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+    img-src 'self' data: https://*.google-analytics.com https://www.google.es https://stats.g.doubleclick.net;
+    frame-src 'self' https://www.google.com https://recaptcha.google.com;
+    connect-src 'self' https://*.google-analytics.com https://stats.g.doubleclick.net http://localhost:8000;
+    font-src 'self' https://cdnjs.cloudflare.com;">
 
     <title>Iniciar Sesión | Jessica Romero Guzmán</title>
 
@@ -21,7 +23,14 @@
     <link href="css/components.css" rel="stylesheet">
     <link href="css/utilities.css" rel="stylesheet">
 
-    <script src="https://www.google.com/recaptcha/enterprise.js?onload=onRecaptchaLoad&render=TU_SITE_KEY" async defer></script>
+    <script>
+        window.onRecaptchaLoad = function() {
+            // Solo definir la función, para evitar el error inicial.
+            console.log("Recaptcha Cargado");
+        };
+    </script>
+    <!-- <script src="https://www.google.com/recaptcha/enterprise.js?onload=onRecaptchaLoad&render=6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl"></script> -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl" async defer></script>
 </head>
 <body class="min-h-screen flex flex-col bg-gradient-to-br from-pink-100 via-purple-50 to-pink-100">
     <!-- Header con botón reposicionado -->
@@ -32,7 +41,6 @@
     </header>
 
     <!-- Contenedor principal centrado -->
-    <!-- Contenedor principal -->
     <div class="w-full max-w-md mx-auto">
         <!-- Avatar y título centrado -->
         <div class="text-center mb-8">
@@ -147,12 +155,19 @@
     <div id="cookie-banner-container" data-component="cookie-banner"></div>
 
     <script type="module">
-        import { initializeLoginForm } from './js/login-form.js';
         import { initializePage } from './js/init.js';
+        import { initializeLoginForm } from './js/login-form.js';
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await initializePage();
-            initializeLoginForm();
+            try {
+                // Primero inicializar la página (incluye validación de rutas)
+                await initializePage();
+
+                // Luego inicializar el formulario de login
+                initializeLoginForm();
+            } catch (error) {
+                console.error('Error initializing login page:', error);
+            }
         });
     </script>
 </body>

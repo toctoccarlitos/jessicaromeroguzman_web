@@ -25,7 +25,7 @@ async function validateRecaptchaToken(action) {
     }
 
     try {
-        const token = await grecaptcha.enterprise.execute('TU_SITE_KEY', {
+        const token = await grecaptcha.enterprise.execute('6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl', {
             action: action
         });
 

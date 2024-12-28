@@ -1,11 +1,44 @@
-// init.js
 import { ComponentLoader } from './components/ComponentLoader.js';
 import { CookieConsentManager } from './analytics/analytics.js';
 import { smoothScroll } from './utils/dom-utils.js';
+import { authManager } from './utils/authManager.js';
+import { routeProtection } from './utils/routeProtection.js';
 
 export async function initializePage() {
     try {
-         // Inicializar cargador de componentes
+        // Primero validar la ruta y autenticación
+        const currentPath = window.location.pathname;
+
+        // Validar si el usuario está autenticado y está intentando acceder al login
+        if (currentPath.includes('login.html')) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Intentar verificar si el token es válido
+                try {
+                    const isValid = await routeProtection.verifyToken();
+                    if (isValid) {
+                        // Si el token es válido, redirigir al dashboard
+                        window.location.href = '/dashboard.html';
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error verifying token:', error);
+                    // Si hay error, limpiar la sesión
+                    routeProtection.clearSession();
+                }
+            }
+        }
+
+        // Para otras rutas protegidas, validar normalmente
+        if (!currentPath.includes('index.html')) {
+            const canContinue = await routeProtection.validateRoute();
+            if (!canContinue) return;
+        }
+
+        // Inicializar el gestor de autenticación
+        await authManager.init();
+
+        // Inicializar cargador de componentes
         const componentLoader = new ComponentLoader();
         await componentLoader.init();
 
@@ -39,7 +72,8 @@ export async function initializePage() {
 
         return {
             componentLoader,
-            analytics
+            analytics,
+            authManager
         };
     } catch (error) {
         console.error('Error in initializePage:', error);
