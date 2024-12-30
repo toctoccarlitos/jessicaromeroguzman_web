@@ -1,85 +1,80 @@
 class HttpInterceptor {
     constructor() {
         // Actualizar a la URL correcta de tu API
-        this.baseURL = 'https://jessicaromeroguzman.com';
+        this.baseURL = 'https://jessicaromeroguzman.com/api';
         this.refreshPromise = null;
     }
 
     async fetch(endpoint, options = {}) {
-        const url = `${this.baseURL}/api/${endpoint}`;
+        const url = `${this.baseURL}/${endpoint}`;
 
-        // Mantener los headers simples como en Postman
+        options.headers = options.headers || {};
+
+        // Añadir token si existe
+        const token = localStorage.getItem('token');
+        if (token) {
+            options.headers['JRG-Authorization'] = `Bearer ${token}`;
+        }
+
         const finalOptions = {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': '*/*',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                ...options.headers
             }
         };
 
-        // Añadir token si existe
-        const token = localStorage.getItem('token');
-        if (token) {
-            options.headers['Authorization'] = `Bearer ${token}`;
-        }
-
         try
         {
-            console.log('Sending request to:', url, finalOptions);
-
             const response = await fetch(url, finalOptions);
 
-            console.log('Response status:', response.status);
-            console.log('Response headers:', Object.fromEntries([...response.headers]));
-
-            // Si es un 406, loguear los headers para debugging
-            if (response.status === 406) {
-                console.log('Request headers:', options.headers);
-                console.log('Response headers:', Object.fromEntries([...response.headers]));
-            }
-
-            // Si es un 401 y no estamos en refresh
-            if (response.status === 401 && !endpoint.includes('/refresh')) {
+            // Si es 401 (no autorizado), manejar el error de autenticación
+            if (response.status === 401) {
+                console.error('Unauthorized access detected, not retrying.');
                 const refreshToken = localStorage.getItem('refresh_token');
-                if (!refreshToken) {
-                    this.handleAuthError();
-                    throw new Error('No refresh token available');
-                }
 
-                try {
-                    const refreshResponse = await fetch(`${this.baseURL}/refresh`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({
-                            refresh_token: refreshToken
-                        })
-                    });
+                // Intentar refrescar el token si es posible
+                if (refreshToken && !endpoint.includes('/refresh') && !endpoint.includes('/login')) {
+                    console.log('Attempting to refresh token...');
+                    try {
+                        const refreshResponse = await fetch(`${this.baseURL}/refresh`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ refresh_token: refreshToken })
+                        });
 
-                    if (!refreshResponse.ok) {
-                        throw new Error('Refresh token failed');
-                    }
-
-                    const refreshData = await refreshResponse.json();
-                    if (refreshData.data?.access_token) {
-                        localStorage.setItem('token', refreshData.data.access_token);
-                        if (refreshData.data.refresh_token) {
-                            localStorage.setItem('refresh_token', refreshData.data.refresh_token);
+                        if (!refreshResponse.ok) {
+                            throw new Error('Refresh token failed');
                         }
 
-                        // Reintentar la petición original con el nuevo token
-                        options.headers['Authorization'] = `Bearer ${refreshData.data.access_token}`;
-                        response = await fetch(url, options);
+                        const refreshData = await refreshResponse.json();
+                        if (refreshData.data?.access_token) {
+                            localStorage.setItem('token', refreshData.data.access_token);
+                            if (refreshData.data.refresh_token) {
+                                localStorage.setItem('refresh_token', refreshData.data.refresh_token);
+                            }
+
+                            // Reintentar la petición original con el nuevo token
+                            finalOptions.headers['JRG-Authorization'] = `Bearer ${refreshData.data.access_token}`;
+                            return await fetch(url, finalOptions).then((res) => res.json());
+                        }
+                    } catch (refreshError) {
+                        console.error('Error refreshing token:', refreshError);
                     }
-                } catch (refreshError) {
-                    console.error('Error refreshing token:', refreshError);
-                    this.handleAuthError();
-                    throw refreshError;
                 }
+
+                // Si no se puede refrescar el token, manejar el error
+                this.handleAuthError();
+                throw {
+                    status: 401,
+                    message: 'Unauthorized access'
+                };
             }
 
             // Para cualquier respuesta no OK
@@ -154,7 +149,7 @@ class HttpInterceptor {
 
         const token = localStorage.getItem('token');
         if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+            headers['JRG-Authorization'] = `Bearer ${token}`;
         }
 
         return headers;

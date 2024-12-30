@@ -37,13 +37,6 @@ class AuthService {
                     body: requestBody
                 });
 
-                // const response = await this.retryOperation(async () => {
-                //     return await httpInterceptor.fetch('login', {
-                //         method: 'POST',
-                //         body: JSON.stringify(requestBody)
-                //     });
-                // });
-
                 const response = await httpInterceptor.fetch('login', {
                     method: 'POST',
                     body: JSON.stringify(requestBody)
@@ -141,7 +134,7 @@ class AuthService {
                 throw new Error('No authentication token available');
             }
 
-            const response = await httpInterceptor.fetch('/profile');
+            const response = await httpInterceptor.fetch('profile');
 
             if (response.data) {
                 localStorage.setItem('userProfile', JSON.stringify(response.data));

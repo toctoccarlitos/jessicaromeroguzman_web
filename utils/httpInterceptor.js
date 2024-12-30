@@ -97,8 +97,8 @@ class HttpInterceptor {
                 throw new Error('Invalid refresh token response');
             }
         } catch (error) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('refresh_token');
+            // localStorage.removeItem('token');
+            // localStorage.removeItem('refresh_token');
             throw error;
         }
     }
@@ -115,7 +115,7 @@ class HttpInterceptor {
 
         const token = localStorage.getItem('token');
         if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+            headers['JRG-Authorization'] = `Bearer ${token}`;
         }
 
         return headers;

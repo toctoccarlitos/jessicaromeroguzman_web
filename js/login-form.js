@@ -125,8 +125,6 @@ export async function initializeLoginForm() {
                     grecaptcha.execute('6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl', { action: 'login' }).then(resolve).catch(reject);
                   });
 
-                // console.log('Token reCAPTCHA:', recaptchaToken);
-
                 const loginResponse = await authService.login(currentEmail, password, recaptchaToken);
 
                 if (loginResponse.status === 'success') {

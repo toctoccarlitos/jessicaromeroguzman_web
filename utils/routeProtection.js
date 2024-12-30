@@ -103,9 +103,9 @@ class RouteProtection {
     }
 
     clearSession() {
-        // localStorage.removeItem('token');
-        // localStorage.removeItem('refresh_token');
-        // localStorage.removeItem('userProfile');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('userProfile');
     }
 }
 
