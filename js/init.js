@@ -5,6 +5,7 @@ import { authManager } from './utils/authManager.js';
 import { routeProtection } from './utils/routeProtection.js';
 
 export async function initializePage() {
+
     try {
         // Primero validar la ruta y autenticación
         const currentPath = window.location.pathname;

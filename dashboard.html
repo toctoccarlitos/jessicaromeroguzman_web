@@ -1,4 +1,3 @@
-# dashboard.html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,103 +5,229 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Panel de Control</title>
 
-    <!-- Mismos meta tags y CSP que otras páginas -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;
         style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-        img-src 'self' data:;
+        img-src 'self' data: https://via.placeholder.com;
         font-src 'self' https://cdnjs.cloudflare.com;">
 
-    <!-- CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/base-styles.css" rel="stylesheet">
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen flex">
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-animation"></div>
+    </div>
+
+    <div class="dashboard-layout">
         <!-- Sidebar -->
-        <aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen flex flex-col transition-all duration-300">
+        <aside id="sidebar" class="sidebar">
             <!-- Logo -->
-            <div class="p-4 border-b border-gray-700">
-                <h1 class="text-xl font-bold">Panel de Control</h1>
+            <div class="logo-section">
+                <a href="#" class="logo-text">
+                    <i class="fas fa-arrow-trend-up logo-icon"></i>
+                    <span class="logo-full-text">JRG UpTeam</span>
+                </a>
+                <button id="collapse-menu-btn" class="collapse-menu-btn lg:block hidden">
+                    <i class="fas fa-angles-left"></i>
+                </button>
             </div>
 
-            <!-- Menú Principal -->
-            <nav class="flex-1 overflow-y-auto">
-                <ul class="py-4">
-                    <!-- Example menu items - Update according to your needs -->
-                    <li class="px-4 py-2 hover:bg-gray-700 cursor-pointer">
-                        <a href="#" class="flex items-center space-x-2" data-route="dashboard">
-                            <i class="fas fa-home"></i>
-                            <span>Inicio</span>
-                        </a>
-                    </li>
-                    <li class="px-4 py-2 hover:bg-gray-700 cursor-pointer">
-                        <a href="#" class="flex items-center space-x-2" data-route="users">
-                            <i class="fas fa-users"></i>
-                            <span>Usuarios</span>
-                        </a>
-                    </li>
-                    <!-- Add more menu items as needed -->
-                </ul>
+            <!-- Navigation -->
+            <nav class="nav-menu flex-grow">
+                <a href="#" class="nav-item active" data-route="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Inicio</span>
+                </a>
+                <a href="#" class="nav-item" data-route="users">
+                    <i class="fas fa-users"></i>
+                    <span>Usuarios</span>
+                </a>
             </nav>
         </aside>
 
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay" class="mobile-overlay"></div>
+
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
-            <!-- Top Navigation -->
-            <header class="bg-white shadow-sm">
-                <div class="flex justify-between items-center px-6 py-4">
-                    <!-- Left side - Toggle sidebar -->
-                    <button id="sidebar-toggle" class="text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-bars text-xl"></i>
+        <div class="dashboard-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="flex items-center h-full px-6">
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-button" class="mobile-menu-button" aria-label="Toggle menu">
+                        <i class="fas fa-bars"></i>
                     </button>
 
-                    <!-- Right side - User menu -->
-                    <div class="relative">
-                        <button id="user-menu-button" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
-                            <span class="text-sm user-name">Cargando...</span>
-                            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-                                 alt="Profile"
-                                 class="w-8 h-8 rounded-full">
-                            <i class="fas fa-chevron-down text-xs"></i>
+                    <div id="mobile-overlay" class="mobile-overlay"></div>
+
+                    <!-- User menu -->
+                    <div class="user-menu">
+                        <button id="user-menu-button" class="user-menu-button">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-info hidden sm:block">
+                                <span class="font-medium user-name">Usuario</span>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 ml-2"></i>
                         </button>
 
-                        <!-- Dropdown menu -->
-                        <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-xl">
-                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" data-route="profile">
-                                <i class="fas fa-user mr-2"></i>
-                                Mi Perfil
+                        <!-- User Dropdown -->
+                        <div id="user-dropdown" class="user-dropdown">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <p class="text-sm text-gray-500">Conectado como</p>
+                                <p class="text-sm font-medium text-gray-900 truncate user-email">usuario@example.com</p>
+                            </div>
+                            <a href="#" class="dropdown-item" data-route="profile">
+                                <i class="fas fa-user"></i>
+                                <span>Mi Perfil</span>
                             </a>
-                            <hr class="my-1 border-gray-200">
-                            <button class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100" id="logout-button">
-                                <i class="fas fa-sign-out-alt mr-2"></i>
-                                Cerrar Sesión
+                            <div class="px-4 py-2 border-t border-gray-100">
+                                <p class="text-xs text-gray-500">Rol de Usuario</p>
+                                <p class="text-sm font-medium text-purple-600 user-role">Administrador</p>
+                            </div>
+                            <button class="dropdown-item w-full text-left" id="logout-button">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Cerrar Sesión</span>
                             </button>
                         </div>
                     </div>
-                </header>
-
-            <!-- Tab Navigation (hidden by default, shown when needed) -->
-            <div id="tab-navigation" class="hidden bg-white border-b">
-                <div class="px-6 flex space-x-4">
-                    <!-- Tabs will be dynamically added here -->
                 </div>
-            </div>
+            </header>
 
             <!-- Main Content Area -->
-            <main id="main-content" class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-                <!-- Content will be dynamically loaded here -->
+            <main class="content-area">
+                <div id="main-content">
+                    <!-- Tarjetas de Estadísticas -->
+                    <div class="dashboard-grid">
+                        <!-- Cards content remains the same -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3 class="card-title">Total Usuarios</h3>
+                            </div>
+                            <div class="card-value">2,564</div>
+                            <div class="card-stats">
+                                <span class="stats-badge positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    12%
+                                </span>
+                                <span class="stats-label">vs mes anterior</span>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <h3 class="card-title">Usuarios Activos</h3>
+                            </div>
+                            <div class="card-value">1,823</div>
+                            <div class="card-stats">
+                                <span class="stats-badge positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    8%
+                                </span>
+                                <span class="stats-label">vs mes anterior</span>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <h3 class="card-title">Activaciones Pendientes</h3>
+                            </div>
+                            <div class="card-value">45</div>
+                            <div class="card-stats">
+                                <span class="stats-badge negative">
+                                    <i class="fas fa-arrow-down"></i>
+                                    3%
+                                </span>
+                                <span class="stats-label">vs mes anterior</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actividad Reciente -->
+                    <div class="dashboard-card mt-8">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h3 class="card-title">Actividad Reciente</h3>
+                        </div>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <p class="activity-description">Nuevo usuario registrado</p>
+                                    <p class="activity-time">Hace 5 minutos</p>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <p class="activity-description">Inicio de sesión detectado</p>
+                                    <p class="activity-time">Hace 15 minutos</p>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <p class="activity-description">Usuario activado</p>
+                                    <p class="activity-time">Hace 30 minutos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
+        <footer id="footer-container" data-component="footer"></footer>
     </div>
+
+    <div id="cookie-banner-container" data-component="cookie-banner"></div>
 
     <script type="module">
         import { initializeDashboard } from './js/dashboard/init.js';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeDashboard();
-        });
+        // Ocultar pantalla de carga cuando todo esté listo
+        async function init() {
+            try {
+                await initializeDashboard();
+
+                // Ocultar pantalla de carga con una transición suave
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                // En caso de error, redirigir al login
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
