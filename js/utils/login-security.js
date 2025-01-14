@@ -1,5 +1,3 @@
-// js/utils/login-security.js
-
 const LOGIN_ATTEMPT_KEY = 'login_attempts';
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutos

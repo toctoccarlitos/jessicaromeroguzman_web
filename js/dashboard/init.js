@@ -7,7 +7,7 @@ export async function initializeDashboard() {
         // 1. Validar autenticación
         const canAccess = await validateDashboardAccess();
         if (!canAccess) {
-            console.log('Access denied, redirecting to login...');
+            // console.log('Access denied, redirecting to login...');
             window.location.href = '/login.html';
             return;
         }
@@ -37,7 +37,7 @@ async function validateDashboardAccess() {
         // Verificar si tenemos token
         const token = localStorage.getItem('token');
         if (!token) {
-            console.log('No token found');
+            // console.log('No token found');
             return false;
         }
 
@@ -136,7 +136,7 @@ async function loadUserProfile() {
         });
 
         document.querySelectorAll('.user-role').forEach(el => {
-            el.textContent = userProfile.roles?.includes('ROLE_ADMIN') ? 
+            el.textContent = userProfile.roles?.includes('ROLE_ADMIN') ?
                 'Administrador' : 'Usuario';
         });
 

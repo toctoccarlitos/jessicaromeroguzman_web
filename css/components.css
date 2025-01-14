@@ -350,9 +350,9 @@ input[type="checkbox"]:checked + label .checkbox-icon {
     left: 0;
 }
 
-.relative {
+/* .relative {
     margin-bottom: 24px;
-}
+} */
 
 .animate-spin {
     animation: spin 1s linear infinite;

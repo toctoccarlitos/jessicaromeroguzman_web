@@ -5,6 +5,8 @@ import { authService } from '../services/authService.js';
 export class AuthManager {
     constructor() {
         this.publicRoutes = [
+            '/',
+            '/index.html',
             '/login.html',
             '/registro.html',
             '/recuperar-password.html',
@@ -17,11 +19,13 @@ export class AuthManager {
     }
 
     init() {
-        // Verificar autenticación en cada carga de página
-        this.checkAuth();
+        if (!this.isPublicRoute(window.location.pathname)) {
+            // Verificar autenticación en cada carga de página
+            this.checkAuth();
 
-        // Añadir listener para expiración de token
-        this.setupTokenExpirationCheck();
+            // Añadir listener para expiración de token
+            this.setupTokenExpirationCheck();
+        }
 
         // Añadir interceptor para respuestas 401
         this.setupResponseInterceptor();
@@ -52,18 +56,29 @@ export class AuthManager {
     }
 
     setupTokenExpirationCheck() {
-        // Verificar el token cada minuto
-        setInterval(async () => {
-            if (authService.isAuthenticated()) {
+        if (this.tokenCheckInterval) {
+            clearInterval(this.tokenCheckInterval);
+        }
+
+        this.tokenCheckInterval = setInterval(async () => {
+            // Solo verificar si NO estamos en una ruta pública
+            if (!this.isPublicRoute(window.location.pathname) && authService.isAuthenticated()) {
                 try {
-                    // Intentar refrescar el token
                     await authService.refreshToken();
                 } catch (error) {
-                    // Si falla el refresh, cerrar sesión
-                    this.logout();
+                    // Solo hacer logout si estamos en una ruta protegida
+                    if (!this.isPublicRoute(window.location.pathname)) {
+                        this.handleLogout();
+                    }
                 }
             }
-        }, 60000); // 1 minuto
+        }, 4 * 60 * 1000);
+    }
+
+    sPublicRoute(path) {
+        return this.publicRoutes.some(route =>
+            path === route || path === route + '/' || path.startsWith(route + '#')
+        );
     }
 
     setupResponseInterceptor() {

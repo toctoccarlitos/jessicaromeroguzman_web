@@ -57,10 +57,10 @@ export async function initializeLoginForm() {
             resetInput(emailInput);
 
             // Verificar intentos de fuerza bruta
-            // if (!preventBruteForce(email)) {
-            //     showToast('Demasiados intentos. Por favor, espera unos minutos.');
-            //     return;
-            // }
+            if (!preventBruteForce(email)) {
+                showToast('Demasiados intentos. Por favor, espera unos minutos.');
+                return;
+            }
 
             if (!emailInput.checkValidity()) {
                 showError('Por favor, introduce un email válido', emailInput);

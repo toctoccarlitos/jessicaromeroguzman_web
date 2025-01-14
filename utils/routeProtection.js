@@ -24,6 +24,12 @@ class RouteProtection {
 
     async validateRoute() {
         const currentPath = window.location.pathname;
+
+        // Si es una ruta pública, permitir acceso sin verificación
+        if (this.isPublicRoute(currentPath)) {
+            return true;
+        }
+
         const hasToken = !!localStorage.getItem('token');
 
         try {

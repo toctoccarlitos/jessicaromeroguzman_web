@@ -37,7 +37,7 @@ class HttpInterceptor {
 
                 // Intentar refrescar el token si es posible
                 if (refreshToken && !endpoint.includes('/refresh') && !endpoint.includes('/login')) {
-                    console.log('Attempting to refresh token...');
+                    // console.log('Attempting to refresh token...');
                     try {
                         const refreshResponse = await fetch(`${this.baseURL}/refresh`, {
                             method: 'POST',
@@ -119,7 +119,7 @@ class HttpInterceptor {
             }
 
             const data = await response.json();
-            
+
             if (data.status === 'success' && data.data && data.data.access_token) {
                 localStorage.setItem('token', data.data.access_token);
                 if (data.data.refresh_token) {

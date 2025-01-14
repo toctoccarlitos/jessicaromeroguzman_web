@@ -1,4 +1,3 @@
-// js/services/authService.js
 import { httpInterceptor } from '../utils/httpInterceptor.js';
 
 class AuthService {
@@ -26,16 +25,16 @@ class AuthService {
                 };
 
                 // Log para comparar con Postman
-                console.log('Request payload:', {
-                    url: `${this.baseURL}/login`,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: requestBody
-                });
+                // console.log('Request payload:', {
+                //     url: `${this.baseURL}/login`,
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'Accept': 'application/json',
+                //         'X-Requested-With': 'XMLHttpRequest'
+                //     },
+                //     body: requestBody
+                // });
 
                 const response = await httpInterceptor.fetch('login', {
                     method: 'POST',

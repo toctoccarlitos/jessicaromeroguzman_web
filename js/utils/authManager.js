@@ -5,40 +5,61 @@ class AuthManager {
         this.publicRoutes = [
             '/',
             '/index.html',
-            '/login.html',
             '/terminos.html',
             '/politicas.html',
             '/cookies.html'
         ];
-
+        
         this.protectedRoutes = [
             '/dashboard.html',
-            '/profile.html'
-            // Añadir aquí otras rutas protegidas
+            '/profile.html',
+            '/users.html'
         ];
-
+        
         this.initialized = false;
-        this.tokenCheckInterval = null;
     }
 
     async init() {
         if (this.initialized) return;
 
+        const currentPath = window.location.pathname;
+        
+        // No inicializar verificaciones de autenticación en rutas públicas
+        if (this.isPublicRoute(currentPath)) {
+            this.initialized = true;
+            return;
+        }
+
         // Verificar autenticación en carga inicial
         await this.checkAuth();
 
-        // Configurar verificación periódica del token
-        this.startTokenCheck();
-
-        // Añadir listener para detección de inactividad
-        this.setupInactivityDetection();
+        // Configurar verificación periódica del token solo si es ruta protegida
+        if (this.isProtectedRoute(currentPath)) {
+            this.startTokenCheck();
+            this.setupInactivityDetection();
+        }
 
         this.initialized = true;
     }
 
+    isPublicRoute(path) {
+        return this.publicRoutes.some(route => 
+            path === route || 
+            path === route + '/' || 
+            path.startsWith(route + '#')
+        );
+    }
+
+    isProtectedRoute(path) {
+        return this.protectedRoutes.some(route => 
+            path === route || 
+            path === route + '/' || 
+            path.startsWith(route + '#')
+        );
+    }
+
     async checkAuth() {
         const currentPath = window.location.pathname;
-        const isPublicRoute = this.isPublicRoute(currentPath);
         const isProtectedRoute = this.isProtectedRoute(currentPath);
 
         try {

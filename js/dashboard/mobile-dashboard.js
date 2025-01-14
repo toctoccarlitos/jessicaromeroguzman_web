@@ -17,7 +17,7 @@ class MobileDashboardHandler {
         // Asignar eventos
         this.mobileMenuButton.addEventListener('click', () => this.toggleMobileMenu());
         this.mobileOverlay.addEventListener('click', () => this.closeMobileMenu());
-        
+
         // Manejar eventos de teclas
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') this.closeMobileMenu();

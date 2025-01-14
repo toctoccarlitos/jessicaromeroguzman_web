@@ -32,7 +32,7 @@ async function validateRecaptchaToken(action) {
         // En un entorno real, esto se haría en el servidor
         // Aquí solo simulamos una validación básica
         if (token && token.length > 0) {
-            console.log(`Token de reCAPTCHA generado para acción: ${action}`);
+            //console.log(`Token de reCAPTCHA generado para acción: ${action}`);
             return true;
         }
         return false;

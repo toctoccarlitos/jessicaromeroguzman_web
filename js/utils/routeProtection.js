@@ -31,7 +31,7 @@ class RouteProtection {
 
         // Siempre permitir acceso a rutas públicas
         if (this.isPublicRoute(currentPath)) {
-            console.log('Ruta pública, acceso permitido');
+            // console.log('Ruta pública, acceso permitido');
             return true;
         }
 
@@ -41,20 +41,20 @@ class RouteProtection {
         try {
             // Verificar si tenemos ambos tokens
             if (hasToken && hasRefreshToken) {
-                console.log('Tokens encontrados, verificando validez...');
+                // console.log('Tokens encontrados, verificando validez...');
                 const isValidToken = await this.verifyToken();
 
                 if (isValidToken) {
-                    console.log('Token válido');
+                    // console.log('Token válido');
                     // Si el token es válido y está en una ruta de auth, redirigir al dashboard
                     if (this.isAuthRoute(currentPath)) {
-                        console.log('Redirigiendo a dashboard desde ruta de auth');
+                        // console.log('Redirigiendo a dashboard desde ruta de auth');
                         window.location.href = '/dashboard.html';
                         return false;
                     }
                     return true;
                 } else {
-                    console.log('Token inválido, limpiando sesión');
+                    // console.log('Token inválido, limpiando sesión');
                     // Si el token no es válido, limpiar y redirigir según la ruta
                     this.clearSession();
                     if (this.isProtectedRoute(currentPath)) {
@@ -65,7 +65,7 @@ class RouteProtection {
             } else {
                 // Sin tokens, verificar si necesita autenticación
                 if (this.isProtectedRoute(currentPath)) {
-                    console.log('Ruta protegida, redirigiendo a login');
+                    // console.log('Ruta protegida, redirigiendo a login');
                     this.redirectToLogin();
                     return false;
                 }
@@ -151,7 +151,7 @@ class RouteProtection {
     }
 
     clearSession() {
-        console.log('Limpiando sesión');
+        // console.log('Limpiando sesión');
         localStorage.removeItem('token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('userProfile');

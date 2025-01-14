@@ -4,23 +4,12 @@
     action="process.php"
     method="POST">
 
-    <!-- Token CSRF oculto -->
-    <input type="hidden"
-        name="csrf_token"
-        id="csrf_token"
-        value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
-
-    <!-- ID único del formulario -->
-    <input type="hidden"
-        name="form_id"
-        value="<?php echo htmlspecialchars(uniqid('contact_')); ?>">
-
-    <!-- Campo honeypot para spam -->
+    <input type="hidden" name="csrf_token" id="csrf_token" value="">
+    <input type="hidden" name="form_id" id="form_id" value="">
+    <input type="hidden" name="timestamp" id="form_timestamp" value="">
+    <input type="hidden" name="recaptcha_token" id="recaptcha_token" value="">
     <div class="hidden">
-        <input type="text"
-            name="website"
-            id="website"
-            autocomplete="off">
+        <input type="text" name="website" id="website" autocomplete="off">
     </div>
 
     <div class="grid md:grid-cols-2 gap-6">
@@ -105,10 +94,20 @@
         </label>
     </div>
 
+    <div class="flex items-start mb-6">
+        <input type="checkbox"
+            id="newsletter"
+            name="newsletter"
+            class="mt-1">
+        <label for="newsletter" class="ml-2 text-sm text-gray-600">
+            Me gustaría recibir consejos y novedades por email sobre emprendimiento digital
+        </label>
+    </div>
+
     <button type="submit"
-            id="submitButton"
-            class="submit-button w-full bg-purple-600 text-white font-bold py-3 px-8 rounded-full hover:bg-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-            disabled>
+        id="submitButton"
+        class="w-full bg-purple-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-purple-700 transform hover:-translate-y-0.5 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:bg-purple-600 disabled:hover:translate-y-0"
+        disabled>
         <span class="group-hover:hidden">Enviar Mensaje</span>
         <span class="hidden group-hover:inline-flex items-center">
             ¡Conversemos! <i class="fas fa-arrow-right ml-2"></i>
