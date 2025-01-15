@@ -57,7 +57,21 @@
                 <!-- Paso 1: Email -->
                 <div id="email-step" class="p-4">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-6">¿Cuál es tu email?</h2>
-                    <form id="email-form" class="space-y-6" novalidate>
+                    <form id="email-form"
+                        class="space-y-6"
+                        data-form-id="<?php echo htmlspecialchars(uniqid('login_email_')); ?>"
+                        novalidate>
+
+                        <!-- Campos de seguridad -->
+                        <input type="hidden" name="csrf_token" id="email_csrf_token" value="">
+                        <input type="hidden" name="form_id" id="email_form_id" value="">
+                        <input type="hidden" name="timestamp" id="email_timestamp" value="">
+                        <input type="hidden" name="recaptcha_token" id="email_recaptcha_token" value="">
+
+                        <!-- Campo honeypot -->
+                        <div class="hidden">
+                            <input type="text" name="website" id="email_website" autocomplete="off">
+                        </div>
                         <div class="relative">
                             <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                                 <i class="fas fa-envelope"></i>
@@ -87,7 +101,21 @@
                 <!-- Paso 2: Password -->
                 <div id="password-step" class="p-4">
                     <div class="p-4">
-                        <form id="password-form" class="space-y-6" novalidate>
+                        <form id="password-form"
+                            class="space-y-6"
+                            data-form-id="<?php echo htmlspecialchars(uniqid('login_pass_')); ?>"
+                            novalidate>
+
+                            <!-- Campos de seguridad -->
+                            <input type="hidden" name="csrf_token" id="password_csrf_token" value="">
+                            <input type="hidden" name="form_id" id="password_form_id" value="">
+                            <input type="hidden" name="timestamp" id="password_timestamp" value="">
+                            <input type="hidden" name="recaptcha_token" id="password_recaptcha_token" value="">
+
+                            <!-- Campo honeypot -->
+                            <div class="hidden">
+                                <input type="text" name="website" id="password_website" autocomplete="off">
+                            </div>
                             <!-- Botón de regreso y email -->
                             <div class="flex items-center mb-4">
                                 <button type="button" id="back-to-email" class="text-purple-600 hover:text-purple-700">
@@ -112,7 +140,8 @@
                                     placeholder="Contraseña">
                                 <button type="button"
                                     id="togglePassword"
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10">
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                                    aria-label="Mostrar contraseña">
                                     <i class="fas fa-eye text-lg"></i>
                                 </button>
                             </div>
@@ -123,7 +152,7 @@
                                     <input type="checkbox"
                                         id="remember"
                                         name="remember"
-                                        class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                        class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded transition-colors cursor-pointer">
                                     <label for="remember" class="ml-2 text-sm text-gray-600">
                                         Recordarme
                                     </label>
@@ -156,15 +185,12 @@
 
     <script type="module">
         import { initializePage } from './js/init.js';
-        import { initializeLoginForm } from './js/login-form.js';
+        import { initializeLoginForm } from './js/components/login-form.js';
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Primero inicializar la página (incluye validación de rutas)
                 await initializePage();
-
-                // Luego inicializar el formulario de login
-                initializeLoginForm();
+                await initializeLoginForm();
             } catch (error) {
                 console.error('Error initializing login page:', error);
             }

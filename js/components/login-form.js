@@ -1,7 +1,5 @@
-import { authService } from './services/authService.js';
-import { initializeLoginSecurity, preventBruteForce, sanitizeLoginInput } from './utils/login-security.js';
-
-let currentEmail = '';
+import { httpInterceptor } from '../utils/httpInterceptor.js';
+import { formSecurity } from '../utils/form-security.js';
 
 export async function initializeLoginForm() {
     const emailStep = document.getElementById('email-step');
@@ -12,32 +10,7 @@ export async function initializeLoginForm() {
     const displayEmail = document.getElementById('display-email');
     const cardContainer = document.getElementById('cardContainer');
 
-    // Verificar si ya hay una sesión activa
-    const checkExistingSession = async () => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                await authService.getProfile();
-                window.location.href = '/dashboard.html';
-                return true;
-            } catch (error) {
-                if (error.status === 401) {
-                    try {
-                        await authService.refreshToken();
-                        window.location.href = '/dashboard.html';
-                        return true;
-                    } catch (refreshError) {
-                        console.error('Error refreshing token:', refreshError);
-                        authService.clearAuthData();
-                    }
-                }
-            }
-        }
-        return false;
-    };
-
-    // Verificar sesión existente
-    await checkExistingSession();
+    let currentEmail = '';
 
     // Establecer altura inicial del contenedor
     if (cardContainer && emailStep) {
@@ -48,19 +21,16 @@ export async function initializeLoginForm() {
 
     // Email form submission
     if (emailForm) {
+
+        // Inicializar seguridad del formulario
+        await formSecurity.initializeForm(emailForm);
+
         emailForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const emailInput = emailForm.querySelector('input[type="email"]');
-            const email = sanitizeLoginInput(emailInput.value);
-
+            const email = formSecurity.sanitizeInput(emailInput.value);
             resetInput(emailInput);
-
-            // Verificar intentos de fuerza bruta
-            if (!preventBruteForce(email)) {
-                showToast('Demasiados intentos. Por favor, espera unos minutos.');
-                return;
-            }
 
             if (!emailInput.checkValidity()) {
                 showError('Por favor, introduce un email válido', emailInput);
@@ -72,6 +42,15 @@ export async function initializeLoginForm() {
             submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Verificando...';
 
             try {
+                // Preparar datos con seguridad
+                const formData = await formSecurity.prepareFormData(emailForm, 'verify_email');
+                formData.email = email;
+
+                // Validar datos antes de continuar
+                if (!formSecurity.validateFormData(formData)) {
+                    throw new Error('Invalid form data');
+                }
+
                 currentEmail = email;
                 if (displayEmail) displayEmail.textContent = email;
 
@@ -84,6 +63,7 @@ export async function initializeLoginForm() {
                 setTimeout(() => {
                     document.getElementById('login-password')?.focus();
                 }, 800);
+
             } catch (error) {
                 showError(error.message, emailInput);
             } finally {
@@ -99,6 +79,10 @@ export async function initializeLoginForm() {
 
     // Password form submission
     if (passwordForm) {
+
+        // Inicializar seguridad del formulario
+        await formSecurity.initializeForm(passwordForm);
+
         passwordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -119,15 +103,40 @@ export async function initializeLoginForm() {
             submitButton.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Verificando...';
 
             try {
-                await new Promise(resolve => grecaptcha.ready(resolve));
+                // Preparar datos con seguridad
+                const formData = await formSecurity.prepareFormData(passwordForm, 'login');
+                formData.email = currentEmail;
+                formData.password = password;
 
-                const recaptchaToken = await new Promise((resolve, reject) => {
-                    grecaptcha.execute('6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl', { action: 'login' }).then(resolve).catch(reject);
-                  });
+                // Validar datos antes del envío
+                if (!formSecurity.validateFormData(formData)) {
+                    throw new Error('Invalid form data');
+                }
 
-                const loginResponse = await authService.login(currentEmail, password, recaptchaToken);
+                const loginResponse = await httpInterceptor.fetch('login', {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
 
                 if (loginResponse.status === 'success') {
+
+                    // Guardar tokens
+                    localStorage.setItem('token', loginResponse.data.access_token);
+                    localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
+
+                    // Si hay datos del usuario, guardarlos también
+                    if (loginResponse.data.user) {
+                        localStorage.setItem('userProfile', JSON.stringify(loginResponse.data.user));
+                    }
+
+                    // Manejar "Recordarme"
+                    const rememberCheckbox = document.getElementById('remember');
+                    if (rememberCheckbox?.checked) {
+                        localStorage.setItem('rememberedEmail', currentEmail);
+                    } else {
+                        localStorage.removeItem('rememberedEmail');
+                    }
+
                     submitButton.classList.add('success-button');
                     submitButton.innerHTML = '<i class="fas fa-check animate-bounce"></i> ¡Bienvenido!';
 
@@ -158,9 +167,13 @@ export async function initializeLoginForm() {
             }, 800);
         });
     }
+
+    // Inicializar funcionalidades adicionales
+    setupPasswordVisibility();
+    setupRememberMe();
 }
 
-// Función para resetear input
+// Funciones auxiliares que se mantienen igual
 function resetInput(input) {
     if (!input) return;
     input.classList.remove('border-red-500');
@@ -168,7 +181,6 @@ function resetInput(input) {
     errorMsg?.remove();
 }
 
-// Función para mostrar error
 function showError(message, inputElement) {
     if (!inputElement) return;
     const errorDiv = document.createElement('div');
@@ -182,87 +194,48 @@ function showError(message, inputElement) {
     inputElement.parentElement?.appendChild(errorDiv);
 }
 
-// Función para mostrar mensajes toast
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    const icon = type === 'success' ? 'check-circle' :
-                 type === 'error' ? 'exclamation-circle' : 'info-circle';
+function setupPasswordVisibility() {
+    const toggleButton = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('login-password');
 
-    toast.className = `fixed bottom-4 right-4 ${
-        type === 'success' ? 'bg-green-500' :
-        type === 'error' ? 'bg-red-500' : 'bg-purple-500'
-    } text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-2
-    transform transition-all duration-300 opacity-0 translate-y-2`;
+    if (!toggleButton || !passwordInput) return;
 
-    toast.innerHTML = `
-        <i class="fas fa-${icon} animate-bounce"></i>
-        <span class="ml-2">${message}</span>
-    `;
+    toggleButton.addEventListener('click', () => {
+        // Cambiar tipo de input
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
 
-    document.body.appendChild(toast);
-
-    requestAnimationFrame(() => {
-        toast.classList.remove('opacity-0', 'translate-y-2');
-    });
-
-    setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
-
-async function handleLoginSuccess(loginResponse) {
-    try {
-        if (loginResponse.status === 'success' && loginResponse.data) {
-            // Guardar tokens
-            localStorage.setItem('token', loginResponse.data.access_token);
-            localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
-
-            // Guardar datos básicos del usuario
-            if (loginResponse.data.user) {
-                localStorage.setItem('userProfile', JSON.stringify(loginResponse.data.user));
-            }
-
-            // Actualizar UI
-            const submitButton = document.querySelector('button[type="submit"]');
-            if (submitButton) {
-                submitButton.classList.add('success-button');
-                submitButton.innerHTML = '<i class="fas fa-check animate-bounce"></i> ¡Bienvenido!';
-            }
-
-            // Redirección
-            setTimeout(() => {
-                const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard.html';
-                sessionStorage.removeItem('redirectUrl');
-                window.location.href = redirectUrl;
-            }, 1500);
-
-            return true;
+        // Cambiar icono
+        const icon = toggleButton.querySelector('i');
+        if (type === 'text') {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            toggleButton.setAttribute('aria-label', 'Ocultar contraseña');
+        } else {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            toggleButton.setAttribute('aria-label', 'Mostrar contraseña');
         }
-        return false;
-    } catch (error) {
-        console.error('Error processing login response:', error);
-        return false;
-    }
+
+        // Mantener el foco en el input de contraseña
+        passwordInput.focus();
+    });
 }
 
-// Manejar eventos de navegación
-window.addEventListener('popstate', (event) => {
-    const emailStep = document.getElementById('email-step');
-    const passwordStep = document.getElementById('password-step');
-    const cardContainer = document.getElementById('cardContainer');
+function setupRememberMe() {
+    const rememberCheckbox = document.getElementById('remember');
 
-    if (event.state && event.state.email) {
-        emailStep.classList.add('slide-left');
-        passwordStep.classList.add('slide-in');
-        document.getElementById('display-email').textContent = event.state.email;
-        cardContainer.style.height = `${passwordStep.offsetHeight}px`;
-    } else {
-        emailStep.classList.remove('slide-left');
-        passwordStep.classList.remove('slide-in');
-        cardContainer.style.height = `${emailStep.offsetHeight}px`;
+    if (!rememberCheckbox) return;
+
+    // Restaurar estado previo si existe
+    const remembered = localStorage.getItem('rememberedEmail');
+    if (remembered) {
+        const emailInput = document.getElementById('login-email');
+        if (emailInput) {
+            emailInput.value = remembered;
+            rememberCheckbox.checked = true;
+        }
     }
-});
 
-// Inicializar seguridad del login al cargar
-initializeLoginSecurity();
+    // No necesitamos un event listener aquí, manejaremos esto en el submit del formulario
+}

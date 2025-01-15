@@ -1,7 +1,13 @@
+import { executeRecaptcha } from '../config/recaptcha.js';
+
 class FormSecurity {
     constructor() {
         this.tokenEndpoint = '/api/security/csrf-token';
         this.tokens = new Map();
+
+        this.loginAttempts = new Map();
+        this.maxLoginAttempts = 5;
+        this.lockoutTime = 15 * 60 * 1000; // 15 minuto
     }
 
     async initializeForm(form) {
@@ -79,7 +85,7 @@ class FormSecurity {
 
     async getReCaptchaToken(action) {
         try {
-            return await grecaptcha.execute('6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl', { action });
+            return await executeRecaptcha(action);
         } catch (error) {
             console.error('Error getting reCAPTCHA token:', error);
             throw error;
@@ -98,6 +104,39 @@ class FormSecurity {
     validateFormData(data) {
         return !!(data.csrf_token && data.timestamp && data.recaptcha_token);
     }
+
+    // Métodos específicos para login
+    checkLoginAttempts(email) {
+        const attempts = this.loginAttempts.get(email) || { count: 0, lockoutEnd: 0 };
+
+        if (attempts.lockoutEnd > Date.now()) {
+            return {
+                allowed: false,
+                remainingTime: Math.ceil((attempts.lockoutEnd - Date.now()) / 1000)
+            };
+        }
+
+        if (attempts.count >= this.maxLoginAttempts) {
+            attempts.lockoutEnd = Date.now() + this.lockoutTime;
+            this.loginAttempts.set(email, attempts);
+            return {
+                allowed: false,
+                remainingTime: this.lockoutTime / 1000
+            };
+        }
+
+        return { allowed: true };
+    }
+
+    incrementLoginAttempts(email) {
+        const attempts = this.loginAttempts.get(email) || { count: 0, lockoutEnd: 0 };
+        attempts.count++;
+        this.loginAttempts.set(email, attempts);
+    }
+
+    resetLoginAttempts(email) {
+        this.loginAttempts.delete(email);
+    }
 }
 
-export const formSecurity = new FormSecurity();
+export const  formSecurity = new FormSecurity();

@@ -1,5 +1,6 @@
 import { httpInterceptor } from '../utils/httpInterceptor.js';
 import { formSecurity } from '../utils/form-security.js';
+import { recaptchaConfig, executeRecaptcha } from '../config/recaptcha.js';
 
 export async function initializeContactForm(form) {
     if (!form) return;

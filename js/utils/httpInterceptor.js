@@ -7,7 +7,6 @@ class HttpInterceptor {
 
     async fetch(endpoint, options = {}) {
         const url = `${this.baseURL}/${endpoint}`;
-
         options.headers = options.headers || {};
 
         // Añadir token si existe
@@ -32,12 +31,10 @@ class HttpInterceptor {
 
             // Si es 401 (no autorizado), manejar el error de autenticación
             if (response.status === 401) {
-                console.error('Unauthorized access detected, not retrying.');
                 const refreshToken = localStorage.getItem('refresh_token');
 
                 // Intentar refrescar el token si es posible
                 if (refreshToken && !endpoint.includes('/refresh') && !endpoint.includes('/login')) {
-                    // console.log('Attempting to refresh token...');
                     try {
                         const refreshResponse = await fetch(`${this.baseURL}/refresh`, {
                             method: 'POST',
