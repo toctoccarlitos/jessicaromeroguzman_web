@@ -1,0 +1,104 @@
+<!-- views/newsletter/index.html -->
+<div class="newsletter-dashboard">
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-container">
+        <div class="tabs-wrapper">
+            <nav class="tabs-nav" role="tablist">
+                <button id="subscriptions-tab"
+                        class="tab-button active"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="subscriptions-panel">
+                    <i class="fas fa-users"></i>
+                    <span>Suscripciones</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Panel de Suscripciones -->
+    <div id="subscriptions-panel" class="panel-container" role="tabpanel" aria-labelledby="subscriptions-tab">
+        <!-- Filtros -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <!-- Search Filter -->
+                <div class="filter-item search-filter">
+                    <label for="search-newsletter">Buscar</label>
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                               id="search-newsletter"
+                               placeholder="Buscar por email..."
+                               autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="filter-item">
+                    <label for="status-filter">Estado</label>
+                    <select id="status-filter">
+                        <option value="">Todos</option>
+                        <option value="active">Activos</option>
+                        <option value="unsubscribed">Dados de baja</option>
+                    </select>
+                </div>
+
+                <!-- Date Filter -->
+                <div class="filter-item">
+                    <label for="date-filter">Fecha</label>
+                    <select id="date-filter">
+                        <option value="">Todas las fechas</option>
+                        <option value="today">Hoy</option>
+                        <option value="week">Esta semana</option>
+                        <option value="month">Este mes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla Container -->
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Estado</th>
+                            <th>Fecha Suscripción</th>
+                            <th>Última Actualización</th>
+                            <th class="text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="newsletter-table-body">
+                        <!-- El contenido de la tabla se insertará dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state hidden">
+                <i class="fas fa-inbox"></i>
+                <h3>No hay suscriptores</h3>
+                <p>No se encontraron suscriptores que coincidan con los filtros aplicados.</p>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <div class="pagination-info" id="pagination-info">
+                    Mostrando <span>0</span> a <span>0</span> de <span>0</span> resultados
+                </div>
+                <div class="pagination-controls">
+                    <button type="button" id="prev-page" class="pagination-btn" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                        Anterior
+                    </button>
+                    <button type="button" id="next-page" class="pagination-btn">
+                        Siguiente
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,28 +1,28 @@
 <form id="newsletterForm" class="max-w-lg mx-auto"
     data-form-id="<?php echo htmlspecialchars(uniqid('newsletter_')); ?>">
-    
+
     <!-- Token CSRF -->
-    <input type="hidden" 
-    name="csrf_token" 
+    <input type="hidden"
+    name="csrf_token"
     id="newsletter_csrf_token"
     value="">
 
     <!-- Campo timestamp -->
-    <input type="hidden" 
-        name="timestamp" 
+    <input type="hidden"
+        name="timestamp"
         id="newsletter_timestamp">
-    
+
     <!-- reCAPTCHA token -->
-    <input type="hidden" 
-        name="recaptcha_token" 
+    <input type="hidden"
+        name="recaptcha_token"
         id="newsletter_recaptcha_token">
 
     <!-- Campo honeypot -->
     <div aria-hidden="true" style="display:none">
-        <input type="text" 
-            name="url" 
-            id="newsletter_url" 
-            tabindex="-1" 
+        <input type="text"
+            name="url"
+            id="newsletter_url"
+            tabindex="-1"
             autocomplete="off">
     </div>
 

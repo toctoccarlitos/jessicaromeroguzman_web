@@ -38,7 +38,8 @@ class AuthService {
 
                 const response = await httpInterceptor.fetch('login', {
                     method: 'POST',
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify(requestBody),
+                    showLoading: false
                 });
 
                 return response;
@@ -98,12 +99,13 @@ class AuthService {
             }
 
             this.refreshTokenPromise = this.retryOperation(async () => {
-                const response = await httpInterceptor.fetch('/refresh', {
+                const response = await httpInterceptor.fetch('refresh', {
                     method: 'POST',
                     body: JSON.stringify({
                         refresh_token,
                         device_info: this.getDeviceInfo()
-                    })
+                    }),
+                    showLoading: false
                 });
 
                 if (response.status === 'success' && response.data) {

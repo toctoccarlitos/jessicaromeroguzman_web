@@ -6,17 +6,37 @@
     <title>Dashboard | Panel de Control</title>
 
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval'
+            https://www.google.com
+            https://www.gstatic.com
+            https://cdnjs.cloudflare.com
+            https://www.googletagmanager.com
+            https://*.google-analytics.com;
         style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-        img-src 'self' data: https://via.placeholder.com;
-        font-src 'self' https://cdnjs.cloudflare.com;">
+        img-src 'self' data:
+            https://*.google-analytics.com
+            https://www.google.es
+            https://via.placeholder.com
+            https://stats.g.doubleclick.net;
+        font-src 'self' https://cdnjs.cloudflare.com;
+        connect-src 'self'
+            https://*.google-analytics.com
+            https://stats.g.doubleclick.net
+            https://*.analytics.google.com
+            https://region1.analytics.google.com;
+        frame-src 'self'
+            https://www.youtube.com
+            https://youtube.com
+            https://www.google.com
+            https://recaptcha.google.com
+            https://www.gstatic.com;">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/base-styles.css" rel="stylesheet">
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gray-50">
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div class="loading-animation"></div>
@@ -38,13 +58,13 @@
 
             <!-- Navigation -->
             <nav class="nav-menu flex-grow">
-                <a href="#" class="nav-item active" data-route="dashboard">
+                <a href="#" class="nav-item active" data-route="/dashboard">
                     <i class="fas fa-home"></i>
                     <span>Inicio</span>
                 </a>
-                <a href="#" class="nav-item" data-route="users">
-                    <i class="fas fa-users"></i>
-                    <span>Usuarios</span>
+                <a href="#" class="nav-item" data-route="/newsletter">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Newsletter</span>
                 </a>
             </nav>
         </aside>
@@ -62,7 +82,7 @@
                         <i class="fas fa-bars"></i>
                     </button>
 
-                    <div id="mobile-overlay" class="mobile-overlay"></div>
+                    <div class="flex-grow"></div>
 
                     <!-- User menu -->
                     <div class="user-menu">
@@ -82,18 +102,16 @@
                                 <p class="text-sm text-gray-500">Conectado como</p>
                                 <p class="text-sm font-medium text-gray-900 truncate user-email">usuario@example.com</p>
                             </div>
-                            <a href="#" class="dropdown-item" data-route="profile">
-                                <i class="fas fa-user"></i>
-                                <span>Mi Perfil</span>
-                            </a>
-                            <div class="px-4 py-2 border-t border-gray-100">
+                            <div class="px-4 py-2">
                                 <p class="text-xs text-gray-500">Rol de Usuario</p>
                                 <p class="text-sm font-medium text-purple-600 user-role">Administrador</p>
                             </div>
-                            <button class="dropdown-item w-full text-left" id="logout-button">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Cerrar Sesión</span>
-                            </button>
+                            <div class="border-t border-gray-100">
+                                <button id="logout-button" class="dropdown-item w-full text-left">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Cerrar Sesión</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -102,117 +120,24 @@
             <!-- Main Content Area -->
             <main class="content-area">
                 <div id="main-content">
-                    <!-- Tarjetas de Estadísticas -->
-                    <div class="dashboard-grid">
-                        <!-- Cards content remains the same -->
-                        <div class="dashboard-card">
-                            <div class="card-header">
-                                <div class="card-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <h3 class="card-title">Total Usuarios</h3>
-                            </div>
-                            <div class="card-value">2,564</div>
-                            <div class="card-stats">
-                                <span class="stats-badge positive">
-                                    <i class="fas fa-arrow-up"></i>
-                                    12%
-                                </span>
-                                <span class="stats-label">vs mes anterior</span>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-card">
-                            <div class="card-header">
-                                <div class="card-icon">
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                                <h3 class="card-title">Usuarios Activos</h3>
-                            </div>
-                            <div class="card-value">1,823</div>
-                            <div class="card-stats">
-                                <span class="stats-badge positive">
-                                    <i class="fas fa-arrow-up"></i>
-                                    8%
-                                </span>
-                                <span class="stats-label">vs mes anterior</span>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-card">
-                            <div class="card-header">
-                                <div class="card-icon">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <h3 class="card-title">Activaciones Pendientes</h3>
-                            </div>
-                            <div class="card-value">45</div>
-                            <div class="card-stats">
-                                <span class="stats-badge negative">
-                                    <i class="fas fa-arrow-down"></i>
-                                    3%
-                                </span>
-                                <span class="stats-label">vs mes anterior</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actividad Reciente -->
-                    <div class="dashboard-card mt-8">
-                        <div class="card-header">
-                            <div class="card-icon">
-                                <i class="fas fa-history"></i>
-                            </div>
-                            <h3 class="card-title">Actividad Reciente</h3>
-                        </div>
-                        <div class="activity-list">
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="activity-details">
-                                    <p class="activity-description">Nuevo usuario registrado</p>
-                                    <p class="activity-time">Hace 5 minutos</p>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-sign-in-alt"></i>
-                                </div>
-                                <div class="activity-details">
-                                    <p class="activity-description">Inicio de sesión detectado</p>
-                                    <p class="activity-time">Hace 15 minutos</p>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                                <div class="activity-details">
-                                    <p class="activity-description">Usuario activado</p>
-                                    <p class="activity-time">Hace 30 minutos</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- El contenido dinámico se cargará aquí -->
                 </div>
             </main>
         </div>
-        <footer id="footer-container" data-component="footer"></footer>
     </div>
-
-    <div id="cookie-banner-container" data-component="cookie-banner"></div>
 
     <script type="module">
         import { initializeDashboard } from './js/dashboard/init.js';
 
-        // Ocultar pantalla de carga cuando todo esté listo
+        // Función de inicialización
         async function init() {
             try {
+                const loadingScreen = document.getElementById('loading-screen');
+
+                // Inicializar dashboard
                 await initializeDashboard();
 
-                // Ocultar pantalla de carga con una transición suave
-                const loadingScreen = document.getElementById('loading-screen');
+                // Ocultar pantalla de carga con transición
                 if (loadingScreen) {
                     loadingScreen.classList.add('fade-out');
                     setTimeout(() => {
@@ -220,9 +145,18 @@
                     }, 500);
                 }
             } catch (error) {
-                console.error('Error initializing dashboard:', error);
-                // En caso de error, redirigir al login
-                window.location.href = '/login.html';
+                console.error('Error in dashboard initialization:', error);
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                }
+
+                // Mostrar error y redirigir si es necesario
+                if (error.status === 401) {
+                    window.location.href = '/login.html';
+                } else {
+                    alert('Error al inicializar el dashboard: ' + error.message);
+                }
             }
         }
 

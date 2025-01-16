@@ -115,7 +115,8 @@ export async function initializeLoginForm() {
 
                 const loginResponse = await httpInterceptor.fetch('login', {
                     method: 'POST',
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData),
+                    showLoading: false
                 });
 
                 if (loginResponse.status === 'success') {

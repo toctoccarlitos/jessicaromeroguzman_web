@@ -9,13 +9,13 @@ class AuthManager {
             '/politicas.html',
             '/cookies.html'
         ];
-        
+
         this.protectedRoutes = [
             '/dashboard.html',
             '/profile.html',
             '/users.html'
         ];
-        
+
         this.initialized = false;
     }
 
@@ -23,7 +23,7 @@ class AuthManager {
         if (this.initialized) return;
 
         const currentPath = window.location.pathname;
-        
+
         // No inicializar verificaciones de autenticación en rutas públicas
         if (this.isPublicRoute(currentPath)) {
             this.initialized = true;
@@ -43,17 +43,17 @@ class AuthManager {
     }
 
     isPublicRoute(path) {
-        return this.publicRoutes.some(route => 
-            path === route || 
-            path === route + '/' || 
+        return this.publicRoutes.some(route =>
+            path === route ||
+            path === route + '/' ||
             path.startsWith(route + '#')
         );
     }
 
     isProtectedRoute(path) {
-        return this.protectedRoutes.some(route => 
-            path === route || 
-            path === route + '/' || 
+        return this.protectedRoutes.some(route =>
+            path === route ||
+            path === route + '/' ||
             path.startsWith(route + '#')
         );
     }

@@ -19,7 +19,7 @@ export async function executeRecaptcha(action) {
         });
 
         return await grecaptcha.execute(recaptchaConfig.siteKey, {
-            action: action 
+            action: action
         });
     } catch (error) {
         console.error('Error executing reCAPTCHA:', error);

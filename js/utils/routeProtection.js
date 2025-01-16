@@ -29,6 +29,10 @@ class RouteProtection {
     async validateRoute() {
         const currentPath = window.location.pathname;
 
+        // Agregar console.log para depuración
+        console.log('Validating route:', currentPath);
+        console.log('Has token:', !!localStorage.getItem('token'));
+
         // Siempre permitir acceso a rutas públicas
         if (this.isPublicRoute(currentPath)) {
             // console.log('Ruta pública, acceso permitido');
@@ -74,12 +78,12 @@ class RouteProtection {
             return true;
         } catch (error) {
             console.error('Error validating route:', error);
-            // Si hay error en ruta protegida, redirigir a login
-            if (this.isProtectedRoute(currentPath)) {
-                this.clearSession();
-                this.redirectToLogin();
-                return false;
-            }
+            // Comentar temporalmente la redirección
+            // if (this.isProtectedRoute(currentPath)) {
+            //     this.clearSession();
+            //     this.redirectToLogin();
+            //     return false;
+            // }
             return true;
         }
     }

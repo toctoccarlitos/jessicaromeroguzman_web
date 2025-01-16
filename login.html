@@ -7,12 +7,30 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="Iniciar sesión - Jessica Romero Guzmán">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://*.google-analytics.com;
-    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
-    img-src 'self' data: https://*.google-analytics.com https://www.google.es https://stats.g.doubleclick.net;
-    frame-src 'self' https://www.google.com https://recaptcha.google.com;
-    connect-src 'self' https://*.google-analytics.com https://stats.g.doubleclick.net http://localhost:8000;
-    font-src 'self' https://cdnjs.cloudflare.com;">
+        script-src 'self' 'unsafe-inline' 'unsafe-eval'
+            https://www.google.com
+            https://www.gstatic.com
+            https://cdnjs.cloudflare.com
+            https://www.googletagmanager.com
+            https://*.google-analytics.com;
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+        img-src 'self' data:
+            https://*.google-analytics.com
+            https://www.google.es
+            https://via.placeholder.com
+            https://stats.g.doubleclick.net;
+        font-src 'self' https://cdnjs.cloudflare.com;
+        connect-src 'self'
+            https://*.google-analytics.com
+            https://stats.g.doubleclick.net
+            https://*.analytics.google.com
+            https://region1.analytics.google.com;
+        frame-src 'self'
+            https://www.youtube.com
+            https://youtube.com
+            https://www.google.com
+            https://recaptcha.google.com
+            https://www.gstatic.com;">
 
     <title>Iniciar Sesión | Jessica Romero Guzmán</title>
 
@@ -32,7 +50,7 @@
     <!-- <script src="https://www.google.com/recaptcha/enterprise.js?onload=onRecaptchaLoad&render=6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl"></script> -->
     <script src="https://www.google.com/recaptcha/api.js?render=6LcRZ6MqAAAAAPVN8N-xthV42hn9va2MyKT9kQIl" async defer></script>
 </head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-pink-100 via-purple-50 to-pink-100">
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-pink-100 via-purple-50 to-pink-100 no-spinner">
     <!-- Header con botón reposicionado -->
     <header class="w-full py-4 px-6">
         <a href="/" class="text-purple-600 hover:text-purple-700 transition-colors inline-flex items-center">

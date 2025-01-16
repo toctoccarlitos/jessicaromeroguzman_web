@@ -31,16 +31,16 @@ function setupFormValidation(form) {
 
     const validateForm = () => {
         // Validar email
-        const isEmailValid = emailInput.value.trim() !== '' && 
+        const isEmailValid = emailInput.value.trim() !== '' &&
                            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value);
-        
+
         // Validar términos
         const areTermsAccepted = termsCheckbox.checked;
 
         // Actualizar estado del botón
         const isFormValid = isEmailValid && areTermsAccepted;
         submitButton.disabled = !isFormValid;
-        
+
         if (isFormValid) {
             submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
         } else {
@@ -83,7 +83,8 @@ async function setupSubmitHandler(form) {
             // Enviar la solicitud
             const response = await httpInterceptor.fetch('newsletter/subscribe', {
                 method: 'POST',
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData),
+                showLoading: false
             });
 
             if (response.status === 'success') {

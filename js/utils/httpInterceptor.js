@@ -1,11 +1,77 @@
+import { loadingManager } from './loading-manager.js';
+
 class HttpInterceptor {
     constructor() {
-        // Actualizar a la URL correcta de tu API
         this.baseURL = 'https://jessicaromeroguzman.com/api';
         this.refreshPromise = null;
+
+        // Lista ampliada de endpoints donde el spinner está desactivado
+        this.noSpinnerEndpoints = [
+            'login',
+            'verify_email',
+            'refresh',
+            'status',
+            'security/csrf-token'
+        ];
+
+        // Nueva lista de páginas donde nunca mostrar el spinner
+        this.noSpinnerPages = [
+            '/login.html',
+            '/index.html',
+            '/',
+            '/cookies.html',
+            '/terminos.html',
+            '/politicas.html'
+        ];
+    }
+
+    shouldShowSpinner(endpoint, options = {}) {
+        // 1. Si se especificó explícitamente showLoading en las opciones, respetar ese valor
+        if (options.hasOwnProperty('showLoading')) {
+            return options.showLoading;
+        }
+
+        // 2. Verificar si estamos en una página donde nunca mostrar spinner
+        const currentPage = window.location.pathname;
+        if (this.noSpinnerPages.includes(currentPage)) {
+            return false;
+        }
+
+        // 3. Verificar si el endpoint está en la lista de exclusión
+        const isExcludedEndpoint = this.noSpinnerEndpoints.some(noSpinnerPath =>
+            endpoint.toLowerCase().includes(noSpinnerPath.toLowerCase())
+        );
+        if (isExcludedEndpoint) {
+            return false;
+        }
+
+        // Por defecto, mostrar spinner
+        return true;
     }
 
     async fetch(endpoint, options = {}) {
+         // Determinar si mostrar el spinner basado en la nueva lógica
+         const shouldShowLoading = this.shouldShowSpinner(endpoint, options);
+
+         const {
+             showLoading = shouldShowLoading,
+             loadingText = 'Cargando...',
+             ...fetchOptions
+         } = options;
+
+         // Si showLoading es true, envolver la petición con el loading manager
+         if (showLoading) {
+             return loadingManager.wrapPromise(
+                 this._executeRequest(endpoint, fetchOptions),
+                 { loadingText }
+             );
+         }
+
+        // Si no, ejecutar la petición directamente
+        return this._executeRequest(endpoint, fetchOptions);
+    }
+
+    async _executeRequest(endpoint, options = {}) {
         const url = `${this.baseURL}/${endpoint}`;
         options.headers = options.headers || {};
 
@@ -25,12 +91,13 @@ class HttpInterceptor {
             }
         };
 
-        try
-        {
+        try {
             const response = await fetch(url, finalOptions);
+            console.log('Response status:', response.status);
 
             // Si es 401 (no autorizado), manejar el error de autenticación
             if (response.status === 401) {
+                console.log('Got 401, token:', localStorage.getItem('token'));
                 const refreshToken = localStorage.getItem('refresh_token');
 
                 // Intentar refrescar el token si es posible
